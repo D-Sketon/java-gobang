@@ -1,32 +1,32 @@
-package blackjack.network;
+package gobang.network;
 
-import blackjack.adapter.RemoteGameAdapter;
-import blackjack.game.GameClient;
-import blackjack.ui.ConnectController;
+import gobang.adapter.RemoteGameAdapter;
+import gobang.game.GameClient;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.*;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
-import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.handler.timeout.IdleStateHandler;
-import javafx.application.Platform;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 使用netty实现的网络通信客户端
  */
 @Slf4j
 public class ClientOnline {
+
     @Getter
     private EventLoopGroup eventExecutors;
 
@@ -45,7 +45,6 @@ public class ClientOnline {
                             ch.pipeline().addLast(new StringDecoder()); //添加处理类
                             ch.pipeline().addLast(new StringEncoder()); //添加处理类
                             ch.pipeline().addLast(new IdleStateHandler(5, 5, 5, TimeUnit.SECONDS));
-                            ch.pipeline().addLast(new HeartBeatClientHandler());
                             ch.pipeline().addLast(new ClientHandler(gameClient)); //添加处理类
                         }
                     });
@@ -72,54 +71,9 @@ public class ClientOnline {
             log.error("获取Channel时有错误发生", e);
             e.printStackTrace();
             //回调函数
-            Platform.runLater(() -> ConnectController.setErrorMsg(e.getMessage()));
+
         } finally {
             eventExecutors.shutdownGracefully();
         }
     }
-
-    static class HeartBeatClientHandler extends SimpleChannelInboundHandler<String> {
-
-        private final AtomicInteger readIdleTimes = new AtomicInteger(0);
-
-        @Override
-        public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-            log.info("client idleTimes = " + readIdleTimes );
-            IdleStateEvent event;
-            if (evt instanceof IdleStateEvent)
-                event = (IdleStateEvent) evt;
-            else
-                return;
-
-            switch (event.state()) {
-                case READER_IDLE:
-                    readIdleTimes.incrementAndGet(); // 读空闲的计数加1
-                    break;
-                case WRITER_IDLE:
-                case ALL_IDLE:
-                    // 不处理
-                    break;
-            }
-            if (readIdleTimes.get() > 3) {
-                ctx.channel().close();
-            }
-        }
-
-        @Override
-        public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-            if ("pong".equals(msg)) {
-                this.channelRead0(ctx, (String) msg);
-            } else {
-                ctx.fireChannelRead(msg);
-            }
-        }
-
-        @Override
-        protected void channelRead0(ChannelHandlerContext channelHandlerContext, String s) throws Exception {
-
-        }
-    }
 }
-
-
-

@@ -3,12 +3,14 @@ package gobang.entity;
 import gobang.enums.ChessType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
-public class Player {
+@NoArgsConstructor
+public class ActionParam {
 
-    private int playerId;
+    private Integer playerId;
 
-    private ChessType type;
+    private Vector2D position;
 }
