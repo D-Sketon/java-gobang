@@ -22,6 +22,8 @@ public class TimeLabel extends JLabel {
     public void startCountDown(Consumer<?> c) {
         countDown = 30;
         setText("倒计时：   00 : 30");
+        // 尝试关闭没有关闭的倒计时
+        stopCountDown();
         timer = new Timer(1000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
