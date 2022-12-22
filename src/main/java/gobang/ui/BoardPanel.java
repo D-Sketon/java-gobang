@@ -1,5 +1,7 @@
 package gobang.ui;
 
+import gobang.enums.ChessType;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -17,10 +19,10 @@ public class BoardPanel extends JPanel implements MouseListener {
 
     private final int offsetY;
 
-    private final Chess[][] chess = new Chess[19][19];
+    private final ChessType[][] chess = new ChessType[19][19];
 
     // only for test
-    private Chess currentStatus = Chess.WHITE;
+    private ChessType currentStatus = ChessType.WHITE;
 
     public BoardPanel(int borderSize, int ovalRadius, int offsetX, int offsetY) {
         super();
@@ -67,10 +69,10 @@ public class BoardPanel extends JPanel implements MouseListener {
     private void drawChess(Graphics g) {
         for (int i = 0; i < 19; i++) {
             for (int j = 0; j < 19; j++) {
-                if (chess[i][j] == Chess.BLACK) {
+                if (chess[i][j] == ChessType.BLACK) {
                     g.setColor(Color.BLACK);
                     g.fillOval(offsetX + boardSize / 18 * i - chessRadius / 2, offsetY + boardSize / 18 * j - chessRadius / 2, chessRadius, chessRadius);
-                } else if (chess[i][j] == Chess.WHITE) {
+                } else if (chess[i][j] == ChessType.WHITE) {
                     g.setColor(Color.WHITE);
                     g.fillOval(offsetX + boardSize / 18 * i - chessRadius / 2, offsetY + boardSize / 18 * j - chessRadius / 2, chessRadius, chessRadius);
                     g.setColor(Color.BLACK);
@@ -91,13 +93,13 @@ public class BoardPanel extends JPanel implements MouseListener {
         if (x >= 0 && x <= boardSize && y >= 0 && y <= boardSize) {
             int roundX = (int) Math.round((double) x / (boardSize / 18));
             int roundY = (int) Math.round((double) y / (boardSize / 18));
-            if (chess[roundX][roundY] != Chess.NONE && chess[roundX][roundY] != null) {
+            if (chess[roundX][roundY] != null) {
                 return;
             }
-            if (currentStatus == Chess.BLACK) {
-                currentStatus = chess[roundX][roundY] = Chess.WHITE;
+            if (currentStatus == ChessType.BLACK) {
+                currentStatus = chess[roundX][roundY] = ChessType.WHITE;
             } else {
-                currentStatus = chess[roundX][roundY] = Chess.BLACK;
+                currentStatus = chess[roundX][roundY] = ChessType.BLACK;
             }
             repaint();
         }
