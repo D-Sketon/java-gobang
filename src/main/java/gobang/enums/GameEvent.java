@@ -14,17 +14,29 @@ public enum GameEvent {
      */
     PLAYER_LEAVE,
     /**
+     * 新回合开始
+     */
+    TURN_START,
+    /**
+     * 玩家下棋，一回合结束
+     */
+    TURN_END,
+    /**
      * 游戏结束，结算
      */
     GAME_RESULT,
+    /**
+     * 重置玩家棋子颜色，准备新的一局游戏开始
+     */
+    COLOR_RESET,
 
     // 操作
-    /**
-     * 玩家下棋
-     */
-    PLAYER_PLAY,
     /**
      * 玩家投降
      */
     PLAYER_SURRENDER,
+    /**
+     * 错误请求
+     */
+    ERROR_REQUEST
 }

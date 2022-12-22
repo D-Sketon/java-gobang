@@ -1,14 +1,10 @@
 package gobang.entity;
 
 import gobang.enums.ChessType;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
-@AllArgsConstructor
-public class Player {
-
-    private int playerId;
+public class Chess {
 
     private ChessType type;
 }

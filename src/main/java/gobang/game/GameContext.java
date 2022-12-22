@@ -1,8 +1,9 @@
 package gobang.game;
 
+import gobang.entity.Board;
+import gobang.entity.Player;
+import gobang.enums.ChessType;
 import lombok.Data;
-
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -17,12 +18,17 @@ public class GameContext {
     String gameId;
 
     /**
-     * 加入牌局的玩家
+     * 加入游戏的玩家
      */
-    Map<Integer, AbstractPlayer> players;
+    Map<Integer, Player> players;
 
     /**
      * 棋盘
      */
-    List<Card> deck;
+    Board board;
 }
+
+
+
+
+

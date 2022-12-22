@@ -1,17 +1,12 @@
-package blackjack.network;
+package gobang.network;
 
-import blackjack.adapter.RemoteGameAdapter;
-import blackjack.entity.RemoteParam;
-import blackjack.game.GameClient;
-import blackjack.ui.MainController;
 import com.google.gson.Gson;
+import gobang.adapter.RemoteGameAdapter;
+import gobang.entity.RemoteParam;
+import gobang.game.GameClient;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import javafx.application.Platform;
 
-/**
- * 基础客户端入站处理器
- */
 public class ClientHandler extends ChannelInboundHandlerAdapter {
 
     RemoteGameAdapter adapter;
@@ -37,6 +32,6 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        Platform.runLater(() -> MainController.showErrorDialog("连接中断"));
+
     }
 }
