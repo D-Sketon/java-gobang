@@ -5,8 +5,9 @@ import gobang.adapter.LocalGameAdapter;
 import gobang.entity.ActionParam;
 import gobang.entity.Player;
 import gobang.entity.Vector2D;
-import gobang.enums.GameEvent;
 import gobang.enums.ChessType;
+import gobang.enums.GameEvent;
+import gobang.network.ServerOnline;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,7 +18,7 @@ import static gobang.enums.ChessType.BLACK;
 import static gobang.enums.ChessType.WHITE;
 
 @Slf4j
-public class GameServer extends AbstractGameEventHandler{
+public class GameServer extends AbstractGameEventHandler {
 
     @Getter
     private final Map<Integer, CommunicationAdapter> adapterMap;
@@ -29,13 +30,22 @@ public class GameServer extends AbstractGameEventHandler{
 
     private final int lsto = 25;
 
+    private final ServerOnline serverOnline;
+
     public GameServer() {
         this.gameContext = new GameContext();
         this.adapterMap = new ConcurrentHashMap<>();
         this.isGameStart = false;
         this.currentPlayerId = 0;
+        this.serverOnline = new ServerOnline(this);
     }
 
+    /**
+     * 开启端口，在局域网内部启动在线服务器
+     */
+    public void startServer() {
+        serverOnline.initNetty();
+    }
 
     public void onLocalJoin(GameEventAware communicator) {
         log.info("New client tries to joinGameLocal...");
@@ -76,7 +86,7 @@ public class GameServer extends AbstractGameEventHandler{
 
     public void onTurnEnd(int playerId, Vector2D position) {
         // 校验下棋者是否是当前轮次的玩家
-        if(playerId != currentPlayerId) {
+        if (playerId != currentPlayerId) {
             log.error("the current player is " + playerId + " expected " + currentPlayerId);
             sendToPlayer(playerId, GameEvent.ERROR_REQUEST, new ActionParam(playerId, null));
             return;
@@ -92,7 +102,7 @@ public class GameServer extends AbstractGameEventHandler{
         broadcast(GameEvent.TURN_END, actionParam);
 
         // 检测新放置的棋是否决定了胜负
-        if(isFinished(position)) {
+        if (isFinished(position)) {
             return;
         }
 

@@ -2,6 +2,7 @@ package gobang.network;
 
 import gobang.adapter.RemoteGameAdapter;
 import gobang.game.GameClient;
+import gobang.ui.MainFrame;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -71,7 +72,7 @@ public class ClientOnline {
             log.error("获取Channel时有错误发生", e);
             e.printStackTrace();
             //回调函数
-
+            MainFrame.setErrorMsg(e.getMessage());
         } finally {
             eventExecutors.shutdownGracefully();
         }

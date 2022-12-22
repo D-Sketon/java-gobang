@@ -5,6 +5,7 @@ import gobang.entity.ActionParam;
 import gobang.entity.Player;
 import gobang.entity.Vector2D;
 import gobang.enums.GameEvent;
+import gobang.network.ClientOnline;
 import gobang.ui.BoardPanel;
 import gobang.ui.ControlPanel;
 import lombok.Getter;
@@ -23,9 +24,12 @@ public class GameClient extends AbstractGameEventHandler {
     private BoardPanel boardPanel;
     private ControlPanel controlPanel;
 
+    private ClientOnline clientOnline;
+
     public GameClient() {
         this.gameContext = new GameContext();
         this.isTurn = false;
+        this.clientOnline = new ClientOnline();
         // maybe todo
     }
 

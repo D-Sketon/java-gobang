@@ -1,5 +1,7 @@
 package gobang.ui;
 
+import gobang.adapter.LocalGameAdapter;
+import gobang.adapter.RemoteGameAdapter;
 import gobang.game.GameClient;
 import gobang.game.GameServer;
 import lombok.Setter;
@@ -63,14 +65,26 @@ public class ControlPanel extends JPanel {
         startServer.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                new Thread(() -> gameServer.startServer(), "Server Netty Thread").start();
+                LocalGameAdapter localGameAdapter = new LocalGameAdapter(gameServer);
+                gameClient.setCommunicationAdapter(localGameAdapter);
+                gameServer.onLocalJoin(gameClient);
             }
         });
         joinServer.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String ipAddress = JOptionPane.showInputDialog(null, "请输入IP地址");
-
+                RemoteGameAdapter remoteGameAdapter = new RemoteGameAdapter();
+                gameClient.setCommunicationAdapter(remoteGameAdapter);
+                remoteGameAdapter.setSelf(gameClient);
+                new Thread(() -> {
+                    try {
+                        gameClient.getClientOnline().initNetty(gameClient, ipAddress);
+                    } catch (Exception e0) {
+                        e0.printStackTrace();
+                    }
+                }, "Client Netty Thread").start();
             }
         });
         startGame.addActionListener(new ActionListener() {

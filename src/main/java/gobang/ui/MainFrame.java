@@ -49,4 +49,8 @@ public class MainFrame extends JFrame {
 
     }
 
+    public static void setErrorMsg(String s) {
+        JOptionPane.showMessageDialog(null, s, "ERROR_MESSAGE",JOptionPane.ERROR_MESSAGE);
+    }
+
 }

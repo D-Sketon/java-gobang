@@ -2,9 +2,11 @@ package gobang.game;
 
 import gobang.entity.Board;
 import gobang.entity.Player;
-import gobang.enums.ChessType;
 import lombok.Data;
+
+import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * 游戏上下文，包含一局游戏的基本信息
@@ -26,6 +28,12 @@ public class GameContext {
      * 棋盘
      */
     Board board;
+
+    public GameContext() {
+        this.gameId = UUID.randomUUID().toString().substring(0, 5);
+        this.players = new HashMap<>();
+        this.board = new Board();
+    }
 }
 
 
