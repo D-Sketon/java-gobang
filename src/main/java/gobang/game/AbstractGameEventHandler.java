@@ -3,9 +3,11 @@ package gobang.game;
 import gobang.player.Player;
 import gobang.entity.Vector2D;
 import gobang.enums.GameEvent;
+import lombok.Getter;
 
 public class AbstractGameEventHandler implements GameEventAware{
 
+    @Getter
     protected GameContext gameContext;
 
     @Override

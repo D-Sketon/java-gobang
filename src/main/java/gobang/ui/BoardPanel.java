@@ -1,9 +1,9 @@
 package gobang.ui;
 
+import gobang.entity.Vector2D;
 import gobang.enums.ChessType;
 import gobang.game.GameClient;
 import gobang.game.GameServer;
-import lombok.Data;
 import lombok.Setter;
 
 import javax.swing.*;
@@ -24,9 +24,6 @@ public class BoardPanel extends JPanel implements MouseListener {
     private final int offsetY;
 
     private final ChessType[][] chess = new ChessType[19][19];
-
-    // only for test
-    private ChessType currentStatus = ChessType.WHITE;
 
     // --- 游戏 相关
     @Setter
@@ -93,12 +90,16 @@ public class BoardPanel extends JPanel implements MouseListener {
         }
     }
 
+
     @Override
     public void mouseClicked(MouseEvent e) {
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
+        if (!gameClient.isTurn()) {
+            return;
+        }
         int x = e.getX() - offsetX;
         int y = e.getY() - offsetY;
         if (x >= 0 && x <= boardSize && y >= 0 && y <= boardSize) {
@@ -107,12 +108,7 @@ public class BoardPanel extends JPanel implements MouseListener {
             if (chess[roundX][roundY] != null) {
                 return;
             }
-            if (currentStatus == ChessType.BLACK) {
-                currentStatus = chess[roundX][roundY] = ChessType.WHITE;
-            } else {
-                currentStatus = chess[roundX][roundY] = ChessType.BLACK;
-            }
-            repaint();
+            gameClient.playerChess(new Vector2D(roundX, roundY));
         }
     }
 
@@ -127,5 +123,10 @@ public class BoardPanel extends JPanel implements MouseListener {
 
     @Override
     public void mouseExited(MouseEvent e) {
+    }
+
+    public void onTurnEnd(ChessType type, Vector2D position) {
+        chess[position.getX()][position.getY()] = type;
+        repaint();
     }
 }

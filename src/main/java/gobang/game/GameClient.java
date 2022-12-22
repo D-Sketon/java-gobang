@@ -2,14 +2,13 @@ package gobang.game;
 
 import gobang.adapter.CommunicationAdapter;
 import gobang.entity.ActionParam;
-import gobang.player.Player;
 import gobang.entity.Vector2D;
 import gobang.enums.ChessType;
 import gobang.enums.GameEvent;
 import gobang.network.ClientOnline;
+import gobang.player.Player;
 import gobang.ui.BoardPanel;
 import gobang.ui.ControlPanel;
-import javafx.application.Platform;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +50,7 @@ public class GameClient extends AbstractGameEventHandler {
     public void onPlayerJoin(Player player) {
         log.info("PlayerId = " + player.getType() + " onPlayerJoin");
         gameContext.getPlayers().put(player.getPlayerId(), player);
+        controlPanel.onPlayerJoin(player);
     }
 
     public void onTurnStart(int playerId) {
@@ -65,6 +65,9 @@ public class GameClient extends AbstractGameEventHandler {
         if (playerId == this.playerId) {
             isTurn = false;
         }
+        log.info(gameContext.getPlayers().toString());
+        ChessType type = gameContext.getPlayers().get(playerId).getType();
+        boardPanel.onTurnEnd(type, position);
     }
 
     public void onPlayerSurrender(int playerId) {

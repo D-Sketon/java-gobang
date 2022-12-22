@@ -54,7 +54,7 @@ public class GameServer extends AbstractGameEventHandler {
         this.isGameStart = false;
         this.timerStart = false;
         this.timer = 0;
-        this.currentPlayerId = 0;
+        this.currentPlayerId = LOCAL_ID;
         this.serverOnline = new ServerOnline(this);
     }
 

@@ -1,6 +1,7 @@
 package gobang.network;
 
 import gobang.game.GameServer;
+import gobang.ui.MainFrame;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -59,6 +60,8 @@ public class ServerOnline {
             cf.channel().closeFuture().sync();
         } catch (Exception e) {
             log.error("TCP server init failed: ", e);
+            // 回调
+            MainFrame.setErrorMsg(e.getMessage());
         } finally {
             bossGroup.shutdownGracefully();
             workGroup.shutdownGracefully();

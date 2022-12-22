@@ -2,8 +2,11 @@ package gobang.ui;
 
 import gobang.adapter.LocalGameAdapter;
 import gobang.adapter.RemoteGameAdapter;
+import gobang.enums.ChessType;
+import gobang.enums.GameStatus;
 import gobang.game.GameClient;
 import gobang.game.GameServer;
+import gobang.player.Player;
 import lombok.Setter;
 
 import javax.swing.*;
@@ -29,11 +32,17 @@ public class ControlPanel extends JPanel {
     private final JButton surrender;
     private final TimeLabel countDown;
 
+    private final JLabel blackPlayer;
+
+    private final JLabel whitePlayer;
+
     // --- 游戏 相关
     @Setter
     private GameClient gameClient;
     @Setter
     private GameServer gameServer;
+
+    private GameStatus gameStatus = GameStatus.INIT;
 
     public ControlPanel() {
         Box vBox = Box.createVerticalBox();
@@ -45,13 +54,18 @@ public class ControlPanel extends JPanel {
         surrender = new CustomButton(btnWidth, btnHeight, "投降");
         countDown = new TimeLabel(null);
         countDown.setFont(FONT);
-
+        blackPlayer = new JLabel("●      黑方玩家 　　　");
+        blackPlayer.setFont(FONT);
+        whitePlayer = new JLabel("○      白方玩家 　　　");
+        whitePlayer.setFont(FONT);
         initBinding();
 
         vBox.add(startServer);
+        vBox.add(blackPlayer);
         vBox.add(Box.createVerticalStrut(30));
         vBox.add(joinServer);
-        vBox.add(Box.createVerticalStrut(230));
+        vBox.add(whitePlayer);
+        vBox.add(Box.createVerticalStrut(400));
         vBox.add(countDown);
         vBox.add(Box.createVerticalStrut(30));
         vBox.add(startGame);
@@ -63,6 +77,8 @@ public class ControlPanel extends JPanel {
         countDown.setVisible(false);
         startGame.setVisible(false);
         surrender.setVisible(false);
+        blackPlayer.setVisible(false);
+        whitePlayer.setVisible(false);
     }
 
     private void initBinding() {
@@ -94,16 +110,45 @@ public class ControlPanel extends JPanel {
         startGame.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                gameServer.startGame();
+                if (gameClient.getGameContext().getPlayers().size() == 2) {
+                    gameServer.startGame();
+                    startGame.setVisible(false);
+                } else {
+                    MainFrame.setErrorMsg("有玩家未准备");
+                }
+
             }
         });
         surrender.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                gameClient.surrender();
             }
         });
 
+    }
+
+    public void onPlayerJoin(Player player) {
+        if (gameStatus == GameStatus.INIT) {
+            startServer.setVisible(false);
+            joinServer.setVisible(false);
+        }
+        blackPlayer.setVisible(true);
+        whitePlayer.setVisible(true);
+        if (player.getType() == ChessType.BLACK) {
+            blackPlayer.setText("●      黑方玩家 已准备");
+        } else {
+            whitePlayer.setText("○      白方玩家 已准备");
+        }
+        // 本地玩家才可以开始游戏
+        if (gameClient.getCommunicationAdapter() instanceof LocalGameAdapter) {
+            startGame.setVisible(true);
+        } else {
+            // 远程玩家默认准备好了，本地玩家也是
+            blackPlayer.setText("●      黑方玩家 已准备");
+            whitePlayer.setText("○      白方玩家 已准备");
+        }
+        gameStatus = GameStatus.BEFORE_START;
     }
 
     static class CustomButton extends JButton {
