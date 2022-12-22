@@ -33,7 +33,6 @@ public class GameContext {
         this.gameId = UUID.randomUUID().toString().substring(0, 5);
         this.players = new HashMap<>();
         this.board = new Board();
-        System.out.println(this.board.getChess()[0][0]);
     }
 }
 

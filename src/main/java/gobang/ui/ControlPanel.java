@@ -27,12 +27,11 @@ public class ControlPanel extends JPanel {
     private final JButton joinServer;
     private final JButton startGame;
     private final JButton surrender;
-    private final JLabel countDown;
+    private final TimeLabel countDown;
 
     // --- 游戏 相关
     @Setter
     private GameClient gameClient;
-
     @Setter
     private GameServer gameServer;
 
@@ -44,7 +43,7 @@ public class ControlPanel extends JPanel {
         joinServer = new CustomButton(btnWidth, btnHeight, "加入服务器");
         startGame = new CustomButton(btnWidth, btnHeight, "开始游戏");
         surrender = new CustomButton(btnWidth, btnHeight, "投降");
-        countDown = new JLabel("    倒计时：    00:00");
+        countDown = new TimeLabel(null);
         countDown.setFont(FONT);
 
         initBinding();
@@ -52,13 +51,18 @@ public class ControlPanel extends JPanel {
         vBox.add(startServer);
         vBox.add(Box.createVerticalStrut(30));
         vBox.add(joinServer);
-        vBox.add(Box.createVerticalStrut(130));
+        vBox.add(Box.createVerticalStrut(230));
         vBox.add(countDown);
         vBox.add(Box.createVerticalStrut(30));
         vBox.add(startGame);
         vBox.add(Box.createVerticalStrut(30));
         vBox.add(surrender);
         add(vBox);
+
+        // 默认不可见
+        countDown.setVisible(false);
+        startGame.setVisible(false);
+        surrender.setVisible(false);
     }
 
     private void initBinding() {
@@ -195,7 +199,6 @@ public class ControlPanel extends JPanel {
             }
             repaint();
         }
-
     }
 
 }
