@@ -87,9 +87,12 @@ public class GameServer extends AbstractGameEventHandler {
         log.info("New client tries to joinGameRemote...");
         Player player = new Player(REMOTE_ID, WHITE); // 新加入的玩家默认先白棋
 
-        // onLocalPlayer()
         gameContext.getPlayers().put(player.getPlayerId(), player);
         adapterMap.put(player.getPlayerId(), adapter);
+
+        // 把房主传给远程玩家
+        Player localPlayer = gameContext.getPlayers().get(LOCAL_ID);
+        adapter.sendEvent(GameEvent.PLAYER_JOIN, localPlayer);
 
         sendPlayerId(player.getPlayerId(), adapter);
 
@@ -206,6 +209,7 @@ public class GameServer extends AbstractGameEventHandler {
      * @param adapter 适配器
      */
     private void sendPlayerId(Integer id, CommunicationAdapter adapter) {
+        log.info("Server send remote playerId to remote player ");
         RemoteGameAdapter remoteGameAdapter = (RemoteGameAdapter) adapter;
         String json = id.toString();
         RemoteParam param = new RemoteParam();

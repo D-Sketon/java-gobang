@@ -1,5 +1,6 @@
 package gobang.game;
 
+import gobang.adapter.CommunicationAdapter;
 import gobang.player.Player;
 import gobang.entity.Vector2D;
 import gobang.enums.GameEvent;
@@ -54,6 +55,7 @@ public class AbstractGameEventHandler implements GameEventAware{
     public void onSendId(int playerId) {
 
     }
+
 
 
     @Override

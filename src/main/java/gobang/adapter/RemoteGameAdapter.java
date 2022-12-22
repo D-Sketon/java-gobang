@@ -75,7 +75,6 @@ public class RemoteGameAdapter implements CommunicationAdapter{
                 case SEND_ID:
                     int id = Integer.parseInt(json);
                     self.onSendId(id);
-                    break;
             }
         }
     }
