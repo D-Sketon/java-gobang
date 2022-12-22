@@ -189,6 +189,8 @@ public class GameServer extends AbstractGameEventHandler {
 
     public void onGameResult(int playerId) {
         this.isGameStart = false;
+        // server尝试reset
+        onGameReset();
         broadcast(GameEvent.GAME_RESULT, new ActionParam(playerId, null));
     }
 

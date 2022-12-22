@@ -91,10 +91,10 @@ public class GameClient extends AbstractGameEventHandler {
 
     public void onGameResult(int playerId) {
         log.info("Player " + playerId + " win");
-        if (communicationAdapter instanceof LocalGameAdapter) {
-            // 本地服务器直接reset，防止出现异步问题
-            reset();
-        }
+//        if (communicationAdapter instanceof LocalGameAdapter) {
+//            // 本地服务器直接reset，防止出现异步问题
+//            reset();
+//        }
         boardPanel.onGameResult();
         controlPanel.onGameResult();
         if (playerId == this.playerId) {
@@ -105,10 +105,7 @@ public class GameClient extends AbstractGameEventHandler {
     }
 
     public void onColorChange(Player player) {
-        if (this.playerId == player.getPlayerId()) {
-            gameContext.getPlayers().get(playerId).setType(player.getType());
-            // 回调函数
-        }
+        gameContext.getPlayers().get(player.getPlayerId()).setType(player.getType());
     }
 
     public void onSendId(int playerId) {
