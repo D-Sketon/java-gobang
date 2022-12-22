@@ -146,14 +146,14 @@ public class GameServer extends AbstractGameEventHandler {
         }
 
         // 通知下一轮次的玩家
-        currentPlayerId = currentPlayerId == 0 ? 1 : 0;
+        currentPlayerId = currentPlayerId == LOCAL_ID ? REMOTE_ID : LOCAL_ID;
         onTurnStart(currentPlayerId);
     }
 
     public void onPlayerSurrender(int playerId) {
         broadcast(GameEvent.PLAYER_SURRENDER, new ActionParam(playerId, null));
 
-        int winner = playerId == 0 ? 1 : 0;
+        int winner = playerId == LOCAL_ID ? REMOTE_ID : LOCAL_ID;
         onGameResult(winner);
     }
 
@@ -166,7 +166,7 @@ public class GameServer extends AbstractGameEventHandler {
         broadcast(GameEvent.COLOR_RESET, player);
     }
 
-    public void onPlayerLeave(Integer playerId) {
+    public void onPlayerLeave(int playerId) {
         // 房主离开
 
         // 远程玩家离开
