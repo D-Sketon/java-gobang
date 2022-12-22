@@ -45,8 +45,8 @@ public class LocalGameAdapter implements CommunicationAdapter{
                 case GAME_RESULT:
                     target.onGameResult(param.getPlayerId());
                     break;
-                case GAME_RESET:
-                    target.onGameReset(data instanceof Player ? cloned : null);
+                case COLOR_RESET:
+                    target.onColorReset(data instanceof Player ? cloned : null);
                     break;
             }
         }
