@@ -2,9 +2,8 @@ package gobang.adapter;
 
 import com.google.gson.Gson;
 import gobang.entity.ActionParam;
-import gobang.entity.Player;
+import gobang.player.Player;
 import gobang.enums.GameEvent;
-import gobang.game.GameClient;
 import gobang.game.GameEventAware;
 import io.netty.channel.Channel;
 import lombok.Getter;
@@ -50,8 +49,8 @@ public class RemoteGameAdapter implements CommunicationAdapter{
                     self.onPlayerSurrender(param.getPlayerId());
                     break;
                 case PLAYER_LEAVE:
-                    player = new Gson().fromJson(json, Player.class);
-                    self.onPlayerLeave(player);
+                    param = new Gson().fromJson(json, ActionParam.class);
+                    self.onPlayerLeave(param.getPlayerId());
                     break;
                 case GAME_RESULT:
                     param = new Gson().fromJson(json, ActionParam.class);

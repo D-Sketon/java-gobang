@@ -1,7 +1,7 @@
 package gobang.adapter;
 
 import gobang.entity.ActionParam;
-import gobang.entity.Player;
+import gobang.player.Player;
 import gobang.enums.GameEvent;
 import gobang.game.GameEventAware;
 
@@ -40,7 +40,7 @@ public class LocalGameAdapter implements CommunicationAdapter{
                     target.onPlayerSurrender(param.getPlayerId());
                     break;
                 case PLAYER_LEAVE:
-                    target.onPlayerLeave(data instanceof Player ? cloned : null);
+                    target.onPlayerLeave(param.getPlayerId());
                     break;
                 case GAME_RESULT:
                     target.onGameResult(param.getPlayerId());

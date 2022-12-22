@@ -3,15 +3,17 @@ package gobang.game;
 import gobang.adapter.CommunicationAdapter;
 import gobang.adapter.LocalGameAdapter;
 import gobang.entity.ActionParam;
-import gobang.entity.Player;
+import gobang.player.Player;
 import gobang.entity.Vector2D;
-import gobang.enums.ChessType;
 import gobang.enums.GameEvent;
 import gobang.network.ServerOnline;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static gobang.enums.ChessType.BLACK;
@@ -26,16 +28,27 @@ public class GameServer extends AbstractGameEventHandler {
     @Getter
     private boolean isGameStart;
 
+    @Getter
+    private boolean timerStart;
+
+    private int timer;
+
     private int currentPlayerId;
 
-    private final int lsto = 25;
+    private final int lsto = 30;
 
     private final ServerOnline serverOnline;
+
+    public final static Integer LOCAL_ID = 1;
+
+    public final static Integer REMOTE_ID = 2;
 
     public GameServer() {
         this.gameContext = new GameContext();
         this.adapterMap = new ConcurrentHashMap<>();
         this.isGameStart = false;
+        this.timerStart = false;
+        this.timer = 0;
         this.currentPlayerId = 0;
         this.serverOnline = new ServerOnline(this);
     }
@@ -50,22 +63,24 @@ public class GameServer extends AbstractGameEventHandler {
     public void onLocalJoin(GameEventAware communicator) {
         log.info("New client tries to joinGameLocal...");
 
-        Player player = new Player(0, BLACK);
+        // 将玩家加入游戏上下文
+        Player player = new Player(LOCAL_ID, BLACK);
         gameContext.getPlayers().put(player.getPlayerId(), player);
 
+        // 添加一个房主适配器
         LocalGameAdapter adapter = new LocalGameAdapter(communicator);
         adapterMap.put(player.getPlayerId(), adapter);
+
+        // 设置房主playerId
+        GameClient gameClient = (GameClient) communicator;
+        gameClient.setPlayerId(player.getPlayerId());
 
         broadcast(GameEvent.PLAYER_JOIN, player);
     }
 
     public void joinGameRemote(CommunicationAdapter adapter) {
         log.info("New client tries to joinGameRemote...");
-        Player player = new Player(1, WHITE); // 新加入的玩家默认先白棋
-
-        Player host = gameContext.getPlayers().get(0);
-        host.setType(BLACK); // 房主设为黑棋
-        onColorReset(host);
+        Player player = new Player(REMOTE_ID, WHITE); // 新加入的玩家默认先白棋
 
         // onLocalPlayer()
         gameContext.getPlayers().put(player.getPlayerId(), player);
@@ -75,7 +90,12 @@ public class GameServer extends AbstractGameEventHandler {
     }
 
     public void gameStart() {
+        // 玩家人数未满
+        if(gameContext.getPlayers().size() != 2) {
+            return;
+        }
         this.isGameStart = true;
+        initTimer();
         onTurnStart(currentPlayerId);
     }
 
@@ -93,10 +113,16 @@ public class GameServer extends AbstractGameEventHandler {
         }
 
         // 校验新放置的棋是否合法
-        if (false) {
+        if (!isValidPosition(position)) {
             // error
 
+            return;
         }
+
+        // 如果是黑棋，需要校验
+
+
+
         ActionParam actionParam = new ActionParam(playerId, position);
         log.info("the " + playerId + " player put a chess at" + position.toString());
         broadcast(GameEvent.TURN_END, actionParam);
@@ -127,6 +153,19 @@ public class GameServer extends AbstractGameEventHandler {
         broadcast(GameEvent.COLOR_RESET, player);
     }
 
+    public void onPlayerLeave(Integer playerId) {
+        // 房主离开
+
+        // 远程玩家离开
+        if (playerId == REMOTE_ID) {
+            sendToPlayer(LOCAL_ID, GameEvent.PLAYER_LEAVE, new ActionParam(playerId, null));
+            // 将房主重置为黑棋
+            Player host = gameContext.getPlayers().get(0);
+            host.setType(BLACK); // 房主设为黑棋
+            onColorReset(host);
+        }
+    }
+
     /**
      * 向所有玩家广播消息
      *
@@ -155,12 +194,32 @@ public class GameServer extends AbstractGameEventHandler {
     private boolean isValidPosition(Vector2D position) {
         int x = position.getX();
         int y = position.getY();
-        return true;
+        return gameContext.getBoard().getChess()[x][y] == null;
     }
 
 
     private boolean isFinished(Vector2D position) {
         return false;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private void initTimer() {
+        new Thread(() -> {
+            TimerTask timerTask = new TimerTask() {
+                @Override
+                public void run() {
+                    if (timerStart) {
+                        timer++;
+                    }
+                    if (timer > lsto) {
+                        onPlayerSurrender(currentPlayerId);
+                    }
+                }
+            };
+            Timer timer = new Timer();
+            timer.schedule(timerTask, 1000, 1000);
+        }).start();
     }
 
 }

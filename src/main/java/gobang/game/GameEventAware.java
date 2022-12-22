@@ -1,9 +1,8 @@
 package gobang.game;
 
-import gobang.entity.Player;
+import gobang.player.Player;
 import gobang.entity.Vector2D;
 import gobang.enums.GameEvent;
-import gobang.enums.ChessType;
 
 /**
  * << callback >>
@@ -53,9 +52,9 @@ public interface GameEventAware {
     /**
      * 玩家离开回调函数
      *
-     * @param player 玩家信息
+     * @param playerId 玩家id
      */
-    void onPlayerLeave(Player player);
+    void onPlayerLeave(Integer playerId);
 
     /**
      * 错误请求的回调

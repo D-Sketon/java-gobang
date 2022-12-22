@@ -2,8 +2,9 @@ package gobang.game;
 
 import gobang.adapter.CommunicationAdapter;
 import gobang.entity.ActionParam;
-import gobang.entity.Player;
+import gobang.player.Player;
 import gobang.entity.Vector2D;
+import gobang.enums.ChessType;
 import gobang.enums.GameEvent;
 import gobang.network.ClientOnline;
 import gobang.ui.BoardPanel;
@@ -20,6 +21,7 @@ public class GameClient extends AbstractGameEventHandler {
     private CommunicationAdapter communicationAdapter;
     private boolean isTurn;
     private Integer playerId;
+    private ChessType currentColor;
 
     private BoardPanel boardPanel;
     private ControlPanel controlPanel;
@@ -65,7 +67,7 @@ public class GameClient extends AbstractGameEventHandler {
     }
 
     public void onPlayerSurrender(int playerId) {
-
+        log.info("PlayerTurn = " + playerId + " onTurnEnd");
     }
 
     public void onGameResult(int playerId) {

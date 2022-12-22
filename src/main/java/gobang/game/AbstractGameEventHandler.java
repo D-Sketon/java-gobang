@@ -1,9 +1,8 @@
 package gobang.game;
 
-import gobang.entity.Player;
+import gobang.player.Player;
 import gobang.entity.Vector2D;
 import gobang.enums.GameEvent;
-import gobang.enums.ChessType;
 
 public class AbstractGameEventHandler implements GameEventAware{
 
@@ -40,7 +39,7 @@ public class AbstractGameEventHandler implements GameEventAware{
     }
 
     @Override
-    public void onPlayerLeave(Player player) {
+    public void onPlayerLeave(Integer playerId) {
 
     }
 

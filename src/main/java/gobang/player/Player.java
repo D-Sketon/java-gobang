@@ -1,4 +1,4 @@
-package gobang.entity;
+package gobang.player;
 
 import gobang.enums.ChessType;
 import lombok.AllArgsConstructor;
