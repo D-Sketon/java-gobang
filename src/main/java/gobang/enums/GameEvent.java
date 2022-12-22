@@ -26,13 +26,21 @@ public enum GameEvent {
      */
     GAME_RESULT,
     /**
-     * 重置玩家棋子颜色，准备新的一局游戏开始
+     * 修改玩家棋子颜色
      */
-    COLOR_RESET,
+    COLOR_CHANGE,
     /**
      * 回传玩家Id
      */
     SEND_ID,
+    /**
+     * 重置游戏
+     */
+    GAME_RESET,
+    /**
+     * 玩家准备
+     */
+    PREPARE,
 
     // 操作
     /**

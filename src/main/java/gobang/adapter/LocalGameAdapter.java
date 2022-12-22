@@ -30,6 +30,9 @@ public class LocalGameAdapter implements CommunicationAdapter{
                 case PLAYER_JOIN:
                     target.onPlayerJoin(data instanceof Player ? cloned : null);
                     break;
+                case PREPARE:
+                    target.onPlayerPrepare(param.getPlayerId());
+                    break;
                 case TURN_START:
                     target.onTurnStart(param.getPlayerId());
                     break;
@@ -45,8 +48,11 @@ public class LocalGameAdapter implements CommunicationAdapter{
                 case GAME_RESULT:
                     target.onGameResult(param.getPlayerId());
                     break;
-                case COLOR_RESET:
-                    target.onColorReset(data instanceof Player ? cloned : null);
+                case COLOR_CHANGE:
+                    target.onColorChange(data instanceof Player ? cloned : null);
+                    break;
+                case GAME_RESET:
+                    target.onGameReset();
                     break;
             }
         }

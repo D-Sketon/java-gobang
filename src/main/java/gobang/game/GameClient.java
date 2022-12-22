@@ -2,6 +2,7 @@ package gobang.game;
 
 import gobang.adapter.CommunicationAdapter;
 import gobang.entity.ActionParam;
+import gobang.entity.Board;
 import gobang.entity.Vector2D;
 import gobang.enums.ChessType;
 import gobang.enums.GameEvent;
@@ -12,6 +13,11 @@ import gobang.ui.ControlPanel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+
+import static gobang.entity.Board.HEIGHT;
+import static gobang.entity.Board.WIDTH;
+import static gobang.enums.ChessType.BLACK;
+import static gobang.enums.ChessType.WHITE;
 
 @Getter
 @Setter
@@ -53,6 +59,11 @@ public class GameClient extends AbstractGameEventHandler {
         controlPanel.onPlayerJoin(player);
     }
 
+    public void onPlayerPrepare(int playerId) {
+        Player player = gameContext.getPlayers().get(playerId);
+        player.setPrepared(true);
+    }
+
     public void onTurnStart(int playerId) {
         log.info("PlayerTurn = " + playerId + " onTurnStart");
         if (playerId == this.playerId) {
@@ -80,7 +91,7 @@ public class GameClient extends AbstractGameEventHandler {
         log.info("Player " + playerId + " win");
     }
 
-    public void onColorReset(Player player) {
+    public void onColorChange(Player player) {
         if (this.playerId == player.getPlayerId()) {
             gameContext.getPlayers().get(playerId).setType(player.getType());
             // 回调函数
@@ -90,6 +101,17 @@ public class GameClient extends AbstractGameEventHandler {
     public void onSendId(int playerId) {
         log.info("PlayerId = " + playerId);
         this.playerId = playerId;
+    }
+
+    public void onGameReset() {
+        log.info("the game is reset");
+        // 清空棋盘
+        Board board = gameContext.getBoard();
+        for(int i = 0; i < HEIGHT; i++) {
+            for(int j = 0; j < WIDTH; j++) {
+                board.getChess()[i][j] = null;
+            }
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

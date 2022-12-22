@@ -17,6 +17,11 @@ public class AbstractGameEventHandler implements GameEventAware{
     }
 
     @Override
+    public void onPlayerPrepare(int playerId) {
+
+    }
+
+    @Override
     public void onTurnStart(int playerId) {
 
     }
@@ -37,7 +42,7 @@ public class AbstractGameEventHandler implements GameEventAware{
     }
 
     @Override
-    public void onColorReset(Player player) {
+    public void onColorChange(Player player) {
 
     }
 
@@ -56,6 +61,10 @@ public class AbstractGameEventHandler implements GameEventAware{
 
     }
 
+    @Override
+    public void onGameReset() {
+
+    }
 
 
     @Override

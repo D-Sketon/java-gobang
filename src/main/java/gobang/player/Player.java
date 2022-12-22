@@ -10,5 +10,7 @@ public class Player {
 
     private int playerId;
 
+    boolean prepared;
+
     private ChessType type;
 }

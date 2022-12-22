@@ -19,6 +19,12 @@ public interface GameEventAware {
     void onPlayerJoin(Player player);
 
     /**
+     * 玩家准备
+     * @param playerId
+     */
+    void onPlayerPrepare(int playerId);
+
+    /**
      * playerId玩家的回合
      *
      * @param playerId 开始回合的玩家
@@ -48,7 +54,7 @@ public interface GameEventAware {
      * 重置玩家棋子颜色
      * @param player
      */
-    void onColorReset(Player player);
+    void onColorChange(Player player);
 
     /**
      * 玩家离开回调函数
@@ -69,6 +75,11 @@ public interface GameEventAware {
      * @param playerId
      */
     void onSendId(int playerId);
+
+    /**
+     * 重置游戏
+     */
+    void onGameReset();
 
     /**
      * 触发事件之前回调函数，如果返回false则不会执行实际事件的触发直接

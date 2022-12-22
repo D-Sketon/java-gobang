@@ -4,12 +4,9 @@ import com.google.gson.Gson;
 import gobang.adapter.CommunicationAdapter;
 import gobang.adapter.LocalGameAdapter;
 import gobang.adapter.RemoteGameAdapter;
-import gobang.entity.ActionParam;
-import gobang.entity.Chess;
-import gobang.entity.RemoteParam;
+import gobang.entity.*;
 import gobang.enums.ChessType;
 import gobang.player.Player;
-import gobang.entity.Vector2D;
 import gobang.enums.GameEvent;
 import gobang.network.ServerOnline;
 import lombok.Getter;
@@ -69,7 +66,7 @@ public class GameServer extends AbstractGameEventHandler {
         log.info("New client tries to joinGameLocal...");
 
         // 将玩家加入游戏上下文
-        Player player = new Player(LOCAL_ID, BLACK);
+        Player player = new Player(LOCAL_ID, false, BLACK);
         gameContext.getPlayers().put(player.getPlayerId(), player);
 
         // 添加一个房主适配器
@@ -83,9 +80,15 @@ public class GameServer extends AbstractGameEventHandler {
         broadcast(GameEvent.PLAYER_JOIN, player);
     }
 
+    public void onPlayerPrepare(int playerId) {
+        Player player = gameContext.getPlayers().get(playerId);
+        player.setPrepared(true);
+        broadcast(GameEvent.PREPARE, playerId);
+    }
+
     public void joinGameRemote(CommunicationAdapter adapter) {
         log.info("New client tries to joinGameRemote...");
-        Player player = new Player(REMOTE_ID, WHITE); // 新加入的玩家默认先白棋
+        Player player = new Player(REMOTE_ID, false, WHITE); // 新加入的玩家默认先白棋
 
         gameContext.getPlayers().put(player.getPlayerId(), player);
         adapterMap.put(player.getPlayerId(), adapter);
@@ -103,6 +106,12 @@ public class GameServer extends AbstractGameEventHandler {
         // 玩家人数未满
         if(gameContext.getPlayers().size() != 2) {
             return;
+        }
+        // 有玩家没准备
+        for(Player player : gameContext.getPlayers().values()) {
+            if(!player.isPrepared()) {
+                return;
+            }
         }
         this.isGameStart = true;
 //        initTimer();
@@ -167,8 +176,8 @@ public class GameServer extends AbstractGameEventHandler {
         broadcast(GameEvent.GAME_RESULT, new ActionParam(playerId, null));
     }
 
-    public void onColorReset(Player player) {
-        broadcast(GameEvent.COLOR_RESET, player);
+    public void onColorChange(Player player) {
+        broadcast(GameEvent.COLOR_CHANGE, player);
     }
 
     public void onPlayerLeave(int playerId) {
@@ -180,7 +189,7 @@ public class GameServer extends AbstractGameEventHandler {
             // 将房主重置为黑棋
             Player host = gameContext.getPlayers().get(0);
             host.setType(BLACK); // 房主设为黑棋
-            onColorReset(host);
+            onColorChange(host);
         }
     }
 
@@ -225,6 +234,27 @@ public class GameServer extends AbstractGameEventHandler {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    public void onGameReset() {
+        log.info("the game is reset");
+        // 更换两个玩家颜色
+        Player localPlayer = gameContext.getPlayers().get(LOCAL_ID);
+        localPlayer.setType(localPlayer.getType() == BLACK ? WHITE : BLACK);
+        onColorChange(localPlayer);
+
+        Player remotePlayer = gameContext.getPlayers().get(REMOTE_ID);
+        remotePlayer.setType(remotePlayer.getType() == BLACK ? WHITE : BLACK);
+        onColorChange(remotePlayer);
+
+        // 清空棋盘
+        Board board = gameContext.getBoard();
+        for(int i = 0; i < HEIGHT; i++) {
+            for(int j = 0; j < WIDTH; j++) {
+                board.getChess()[i][j] = null;
+            }
+        }
+        broadcast(GameEvent.GAME_RESET, null);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
