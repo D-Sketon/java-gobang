@@ -18,6 +18,7 @@ import static gobang.entity.Board.HEIGHT;
 import static gobang.entity.Board.WIDTH;
 import static gobang.enums.ChessType.BLACK;
 import static gobang.enums.ChessType.WHITE;
+import static gobang.game.GameServer.REMOTE_ID;
 
 @Getter
 @Setter
@@ -105,6 +106,9 @@ public class GameClient extends AbstractGameEventHandler {
 
     public void onGameReset() {
         log.info("the game is reset");
+        Player player = gameContext.getPlayers().get(REMOTE_ID);
+        player.setPrepared(false);
+
         // 清空棋盘
         Board board = gameContext.getBoard();
         for(int i = 0; i < HEIGHT; i++) {
@@ -124,4 +128,11 @@ public class GameClient extends AbstractGameEventHandler {
         communicate(GameEvent.PLAYER_SURRENDER, new ActionParam(this.playerId, null));
     }
 
+    public void prepare() {
+        communicate(GameEvent.PREPARE, new ActionParam(this.playerId, null));
+    }
+
+    public void reset() {
+        communicate(GameEvent.GAME_RESET, null);
+    }
 }

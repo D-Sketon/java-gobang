@@ -70,7 +70,7 @@ public class GameServer extends AbstractGameEventHandler {
         log.info("New client tries to joinGameLocal...");
 
         // 将玩家加入游戏上下文
-        Player player = new Player(LOCAL_ID, false, BLACK);
+        Player player = new Player(LOCAL_ID, true, BLACK);
         gameContext.getPlayers().put(player.getPlayerId(), player);
 
         // 添加一个房主适配器
@@ -259,6 +259,7 @@ public class GameServer extends AbstractGameEventHandler {
         onColorChange(localPlayer);
 
         Player remotePlayer = gameContext.getPlayers().get(REMOTE_ID);
+        remotePlayer.setPrepared(false);
         remotePlayer.setType(remotePlayer.getType() == BLACK ? WHITE : BLACK);
         onColorChange(remotePlayer);
 
