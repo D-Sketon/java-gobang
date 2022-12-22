@@ -21,7 +21,9 @@ public class TimeLabel extends JLabel {
         this.consumer = consumer;
     }
 
-    private void startCountDown() {
+    public void startCountDown() {
+        countDown = 30;
+        setText("倒计时：   00 : 30");
         timer = new Timer(1000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -41,7 +43,7 @@ public class TimeLabel extends JLabel {
         timer.start();
     }
 
-    private void stopCountDown() {
+    public void stopCountDown() {
         if (timer != null) {
             timer.stop();
         }

@@ -57,13 +57,16 @@ public class GameClient extends AbstractGameEventHandler {
         log.info("PlayerTurn = " + playerId + " onTurnStart");
         if (playerId == this.playerId) {
             isTurn = true;
+            controlPanel.onSelfTurnStart();
         }
+        controlPanel.onTurnStart(playerId);
     }
 
     public void onTurnEnd(int playerId, Vector2D position) {
         log.info("PlayerTurn = " + playerId + " onTurnEnd");
         if (playerId == this.playerId) {
             isTurn = false;
+            controlPanel.onSelfTurnEnd();
         }
         ChessType type = gameContext.getPlayers().get(playerId).getType();
         boardPanel.onTurnEnd(type, position);
