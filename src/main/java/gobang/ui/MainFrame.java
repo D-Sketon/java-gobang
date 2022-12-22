@@ -15,12 +15,6 @@ public class MainFrame extends JFrame {
     private static final int FRAME_HEIGHT = 740;
     private static final int BOARD_SIZE = 630;
 
-    // --- About Game
-
-    private GameClient gameClient;
-
-    private GameServer gameServer;
-
     public MainFrame() {
         setTitle("508五子棋");
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
@@ -36,8 +30,8 @@ public class MainFrame extends JFrame {
         controlPanel.setSize(new Dimension(FRAME_WIDTH - FRAME_HEIGHT + 40, FRAME_HEIGHT));
         add(controlPanel);
 
-        gameClient = new GameClient(boardPanel, controlPanel);
-        gameServer = new GameServer();
+        GameClient gameClient = new GameClient(boardPanel, controlPanel);
+        GameServer gameServer = new GameServer();
         boardPanel.setGameClient(gameClient);
         boardPanel.setGameServer(gameServer);
         controlPanel.setGameClient(gameClient);
@@ -51,6 +45,10 @@ public class MainFrame extends JFrame {
 
     public static void setErrorMsg(String s) {
         JOptionPane.showMessageDialog(null, s, "ERROR_MESSAGE",JOptionPane.ERROR_MESSAGE);
+    }
+
+    public static void setInfoMsg(String s) {
+        JOptionPane.showMessageDialog(null, s, "INFO_MESSAGE",JOptionPane.INFORMATION_MESSAGE);
     }
 
 }

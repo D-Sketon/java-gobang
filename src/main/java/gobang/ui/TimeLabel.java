@@ -16,12 +16,10 @@ public class TimeLabel extends JLabel {
     Timer timer;
 
     public TimeLabel(Consumer<?> consumer) {
-        countDown = 30;
-        setText("倒计时：   00 : 30");
         this.consumer = consumer;
     }
 
-    public void startCountDown() {
+    public void startCountDown(Consumer<?> c) {
         countDown = 30;
         setText("倒计时：   00 : 30");
         timer = new Timer(1000, new ActionListener() {
@@ -32,7 +30,9 @@ public class TimeLabel extends JLabel {
                     String numFormat = decimalFormat.format(countDown);
                     setText("倒计时：   00 : " + numFormat);
                 } else {
-                    if (consumer != null) {
+                    if (c != null) {
+                        c.accept(null);
+                    } else if (consumer != null) {
                         consumer.accept(null);
                     }
                     Timer s = (Timer) e.getSource();

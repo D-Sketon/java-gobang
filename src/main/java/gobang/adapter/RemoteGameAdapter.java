@@ -76,11 +76,14 @@ public class RemoteGameAdapter implements CommunicationAdapter{
                 case COLOR_CHANGE:
                     player = new Gson().fromJson(json, Player.class);
                     self.onColorChange(player);
+                    break;
                 case SEND_ID:
                     int id = Integer.parseInt(json);
                     self.onSendId(id);
+                    break;
                 case GAME_RESET:
                     self.onGameReset();
+                    break;
             }
         }
     }

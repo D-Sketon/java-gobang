@@ -93,6 +93,7 @@ public class BoardPanel extends JPanel implements MouseListener {
 
     @Override
     public void mouseClicked(MouseEvent e) {
+        // do nothing
     }
 
     @Override
@@ -114,19 +115,30 @@ public class BoardPanel extends JPanel implements MouseListener {
 
     @Override
     public void mouseReleased(MouseEvent e) {
-
+        // do nothing
     }
 
     @Override
     public void mouseEntered(MouseEvent e) {
+        // do nothing
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
+        // do nothing
     }
 
     public void onTurnEnd(ChessType type, Vector2D position) {
         chess[position.getX()][position.getY()] = type;
+        repaint();
+    }
+
+    public void onGameResult() {
+        for (int i = 0; i < chess[0].length; i++) {
+            for (int j = 0; j < chess.length; j++) {
+                chess[i][j] = null;
+            }
+        }
         repaint();
     }
 }

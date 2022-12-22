@@ -1,6 +1,7 @@
 package gobang.game;
 
 import gobang.adapter.CommunicationAdapter;
+import gobang.adapter.LocalGameAdapter;
 import gobang.entity.ActionParam;
 import gobang.entity.Board;
 import gobang.entity.Vector2D;
@@ -10,14 +11,13 @@ import gobang.network.ClientOnline;
 import gobang.player.Player;
 import gobang.ui.BoardPanel;
 import gobang.ui.ControlPanel;
+import gobang.ui.MainFrame;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import static gobang.entity.Board.HEIGHT;
 import static gobang.entity.Board.WIDTH;
-import static gobang.enums.ChessType.BLACK;
-import static gobang.enums.ChessType.WHITE;
 import static gobang.game.GameServer.REMOTE_ID;
 
 @Getter
@@ -39,7 +39,6 @@ public class GameClient extends AbstractGameEventHandler {
         this.gameContext = new GameContext();
         this.isTurn = false;
         this.clientOnline = new ClientOnline();
-        // maybe todo
     }
 
     public GameClient(BoardPanel boardPanel, ControlPanel controlPanel) {
@@ -63,6 +62,8 @@ public class GameClient extends AbstractGameEventHandler {
     public void onPlayerPrepare(int playerId) {
         Player player = gameContext.getPlayers().get(playerId);
         player.setPrepared(true);
+        ChessType type = gameContext.getPlayers().get(playerId).getType();
+        controlPanel.onPlayerPrepare(type);
     }
 
     public void onTurnStart(int playerId) {
@@ -71,7 +72,7 @@ public class GameClient extends AbstractGameEventHandler {
             isTurn = true;
             controlPanel.onSelfTurnStart();
         }
-        controlPanel.onTurnStart(playerId);
+        controlPanel.onTurnStart();
     }
 
     public void onTurnEnd(int playerId, Vector2D position) {
@@ -90,6 +91,17 @@ public class GameClient extends AbstractGameEventHandler {
 
     public void onGameResult(int playerId) {
         log.info("Player " + playerId + " win");
+        if (communicationAdapter instanceof LocalGameAdapter) {
+            // 本地服务器直接reset，防止出现异步问题
+            reset();
+        }
+        boardPanel.onGameResult();
+        controlPanel.onGameResult();
+        if (playerId == this.playerId) {
+            MainFrame.setInfoMsg("您赢了！");
+        } else {
+            MainFrame.setInfoMsg("您输了！");
+        }
     }
 
     public void onColorChange(Player player) {
@@ -107,12 +119,15 @@ public class GameClient extends AbstractGameEventHandler {
     public void onGameReset() {
         log.info("the game is reset");
         Player player = gameContext.getPlayers().get(REMOTE_ID);
-        player.setPrepared(false);
+        if (player != null) {
+            player.setPrepared(false);
+        }
+
 
         // 清空棋盘
         Board board = gameContext.getBoard();
-        for(int i = 0; i < HEIGHT; i++) {
-            for(int j = 0; j < WIDTH; j++) {
+        for (int i = 0; i < HEIGHT; i++) {
+            for (int j = 0; j < WIDTH; j++) {
                 board.getChess()[i][j] = null;
             }
         }
@@ -135,4 +150,5 @@ public class GameClient extends AbstractGameEventHandler {
     public void reset() {
         communicate(GameEvent.GAME_RESET, null);
     }
+
 }

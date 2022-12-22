@@ -6,11 +6,12 @@ import gobang.adapter.LocalGameAdapter;
 import gobang.adapter.RemoteGameAdapter;
 import gobang.entity.*;
 import gobang.enums.ChessType;
-import gobang.player.Player;
 import gobang.enums.GameEvent;
 import gobang.network.ServerOnline;
+import gobang.player.Player;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -87,7 +88,7 @@ public class GameServer extends AbstractGameEventHandler {
     public void onPlayerPrepare(int playerId) {
         Player player = gameContext.getPlayers().get(playerId);
         player.setPrepared(true);
-        broadcast(GameEvent.PREPARE, playerId);
+        broadcast(GameEvent.PREPARE, new ActionParam(playerId, null));
     }
 
     public void joinGameRemote(CommunicationAdapter adapter) {
@@ -108,12 +109,12 @@ public class GameServer extends AbstractGameEventHandler {
 
     public void startGame() {
         // 玩家人数未满
-        if(gameContext.getPlayers().size() != 2) {
+        if (gameContext.getPlayers().size() != 2) {
             return;
         }
         // 有玩家没准备
-        for(Player player : gameContext.getPlayers().values()) {
-            if(!player.isPrepared()) {
+        for (Player player : gameContext.getPlayers().values()) {
+            if (!player.isPrepared()) {
                 return;
             }
         }
@@ -131,7 +132,7 @@ public class GameServer extends AbstractGameEventHandler {
     }
 
     public void onTurnEnd(int playerId, Vector2D position) {
-        if(!isGameStart) {
+        if (!isGameStart) {
             sendToPlayer(playerId, GameEvent.ERROR_REQUEST, new ActionParam(playerId, null));
             return;
         }
@@ -265,8 +266,8 @@ public class GameServer extends AbstractGameEventHandler {
 
         // 清空棋盘
         Board board = gameContext.getBoard();
-        for(int i = 0; i < HEIGHT; i++) {
-            for(int j = 0; j < WIDTH; j++) {
+        for (int i = 0; i < HEIGHT; i++) {
+            for (int j = 0; j < WIDTH; j++) {
                 board.getChess()[i][j] = null;
             }
         }
@@ -289,89 +290,89 @@ public class GameServer extends AbstractGameEventHandler {
         ChessType type = gameContext.getBoard().getChess()[position.getX()][position.getY()];
 
         // 横向五子
-        for(int i = x + 1; i < WIDTH; i++) {
+        for (int i = x + 1; i < WIDTH; i++) {
             ChessType chessType = gameContext.getBoard().getChess()[i][y];
-            if(chessType != null && chessType.equals(type)) {
+            if (chessType != null && chessType.equals(type)) {
                 consecutiveChess++;
             } else {
                 break;
             }
         }
-        for(int i = x - 1; i >= 0; i--) {
+        for (int i = x - 1; i >= 0; i--) {
             ChessType chessType = gameContext.getBoard().getChess()[i][y];
-            if(chessType != null && chessType.equals(type)) {
+            if (chessType != null && chessType.equals(type)) {
                 consecutiveChess++;
             } else {
                 break;
             }
         }
-        if(consecutiveChess == 5) {
+        if (consecutiveChess == 5) {
             return true;
         }
 
         // 竖向五子
         consecutiveChess = 1;
-        for(int j = y + 1; j < HEIGHT; j++) {
+        for (int j = y + 1; j < HEIGHT; j++) {
             ChessType chessType = gameContext.getBoard().getChess()[x][j];
-            if(chessType != null && chessType.equals(type)) {
+            if (chessType != null && chessType.equals(type)) {
                 consecutiveChess++;
             } else {
                 break;
             }
         }
-        for(int j = y - 1; j >= 0; j--) {
+        for (int j = y - 1; j >= 0; j--) {
             ChessType chessType = gameContext.getBoard().getChess()[x][j];
-            if(chessType != null && chessType.equals(type)) {
+            if (chessType != null && chessType.equals(type)) {
                 consecutiveChess++;
             } else {
                 break;
             }
         }
-        if(consecutiveChess == 5) {
+        if (consecutiveChess == 5) {
             return true;
         }
 
         // 右侧45五子
         consecutiveChess = 1;
-        for(int i = x + 1; i < WIDTH; i++) {
+        for (int i = x + 1; i < WIDTH; i++) {
             ChessType chessType = gameContext.getBoard().getChess()[i][y + i - x];
-            if(chessType != null && chessType.equals(type)) {
+            if (chessType != null && chessType.equals(type)) {
                 consecutiveChess++;
             } else {
                 break;
             }
         }
-        for(int i = x - 1; i >= 0; i--) {
+        for (int i = x - 1; i >= 0; i--) {
             ChessType chessType = gameContext.getBoard().getChess()[i][y + i - x];
-            if(chessType != null && chessType.equals(type)) {
+            if (chessType != null && chessType.equals(type)) {
                 consecutiveChess++;
             } else {
                 break;
             }
         }
-        if(consecutiveChess == 5) {
+        if (consecutiveChess == 5) {
             return true;
         }
 
         // 左侧45五子
         consecutiveChess = 1;
-        for(int i = x + 1; i < WIDTH; i++) {
+        for (int i = x + 1; i < WIDTH; i++) {
             ChessType chessType = gameContext.getBoard().getChess()[i][y - i + x];
-            if(chessType != null && chessType.equals(type)) {
+            if (chessType != null && chessType.equals(type)) {
                 consecutiveChess++;
             } else {
                 break;
             }
         }
-        for(int i = x - 1; i >= 0; i--) {
+        for (int i = x - 1; i >= 0; i--) {
             ChessType chessType = gameContext.getBoard().getChess()[i][y - i + x];
-            if(chessType != null && chessType.equals(type)) {
+            if (chessType != null && chessType.equals(type)) {
                 consecutiveChess++;
             } else {
                 break;
             }
         }
-        if(consecutiveChess == 5) {
+        if (consecutiveChess == 5) {
             return true;
         }
 
@@ -385,7 +386,7 @@ public class GameServer extends AbstractGameEventHandler {
             TimerTask timerTask = new TimerTask() {
                 @Override
                 public void run() {
-                    if(!isGameStart) {
+                    if (!isGameStart) {
                         return;
                     }
                     if (timerStart) {

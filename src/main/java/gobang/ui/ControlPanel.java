@@ -31,6 +31,8 @@ public class ControlPanel extends JPanel {
     private final JButton joinServer;
     private final JButton startGame;
     private final JButton surrender;
+
+    private final JButton ready;
     private final TimeLabel countDown;
 
     private final JLabel blackPlayer;
@@ -53,6 +55,7 @@ public class ControlPanel extends JPanel {
         joinServer = new CustomButton(btnWidth, btnHeight, "加入服务器");
         startGame = new CustomButton(btnWidth, btnHeight, "开始游戏");
         surrender = new CustomButton(btnWidth, btnHeight, "投降");
+        ready = new CustomButton(btnWidth, btnHeight, "准备");
         countDown = new TimeLabel(new Consumer<Object>() {
             @Override
             public void accept(Object o) {
@@ -75,8 +78,8 @@ public class ControlPanel extends JPanel {
         vBox.add(countDown);
         vBox.add(Box.createVerticalStrut(30));
         vBox.add(startGame);
-        vBox.add(Box.createVerticalStrut(30));
         vBox.add(surrender);
+        vBox.add(ready);
         add(vBox);
 
         // 默认不可见
@@ -85,6 +88,7 @@ public class ControlPanel extends JPanel {
         surrender.setVisible(false);
         blackPlayer.setVisible(false);
         whitePlayer.setVisible(false);
+        ready.setVisible(false);
     }
 
     private void initBinding() {
@@ -128,10 +132,19 @@ public class ControlPanel extends JPanel {
         surrender.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                onSelfTurnEnd();
                 gameClient.surrender();
             }
         });
-
+        ready.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                gameClient.prepare();
+                countDown.stopCountDown();
+                ready.setVisible(false);
+                countDown.setVisible(false);
+            }
+        });
     }
 
     public void onPlayerJoin(Player player) {
@@ -141,38 +154,96 @@ public class ControlPanel extends JPanel {
         }
         blackPlayer.setVisible(true);
         whitePlayer.setVisible(true);
-        if (player.getType() == ChessType.BLACK) {
-            blackPlayer.setText("●      黑方玩家 已准备");
-        } else {
-            whitePlayer.setText("○      白方玩家 已准备");
-        }
         // 本地玩家才可以开始游戏
         if (gameClient.getCommunicationAdapter() instanceof LocalGameAdapter) {
-            startGame.setVisible(true);
+            // 本地玩家自动准备
+            if (!startGame.isVisible()) {
+                gameClient.prepare();
+                startGame.setVisible(true);
+            }
+
         } else {
-            // 远程玩家默认准备好了，本地玩家也是
-            blackPlayer.setText("●      黑方玩家 已准备");
-            whitePlayer.setText("○      白方玩家 已准备");
+            if (!ready.isVisible()) {
+                // 查看本地服务器玩家的情况
+                gameClient.getGameContext().getPlayers().forEach((k, v) -> {
+                    if (v.isPrepared()) {
+                        if (v.getType() == ChessType.BLACK) {
+                            blackPlayer.setText("●      黑方玩家 已准备");
+                        } else if (v.getType() == ChessType.WHITE) {
+                            whitePlayer.setText("○      白方玩家 已准备");
+                        }
+                    }
+                });
+                // 弹出计时器要求准备
+                countDown.setVisible(true);
+                countDown.startCountDown(new Consumer<Object>() {
+                    @Override
+                    public void accept(Object o) {
+                        gameClient.getClientOnline().getEventExecutors().shutdownGracefully();
+                        MainFrame.setErrorMsg("长时间未准备，自动断开连接");
+                    }
+                });
+                ready.setVisible(true);
+            }
         }
         gameStatus = GameStatus.BEFORE_START;
     }
 
-    public void onTurnStart(int playerId) {
+    public void onTurnStart() {
         if (gameStatus != GameStatus.PLAYING) {
             gameStatus = GameStatus.PLAYING;
             surrender.setVisible(true);
-
         }
     }
 
     public void onSelfTurnStart() {
         countDown.setVisible(true);
-        countDown.startCountDown();
+        countDown.startCountDown(null);
     }
 
     public void onSelfTurnEnd() {
         countDown.setVisible(false);
         countDown.stopCountDown();
+    }
+
+    public void onGameResult() {
+        gameStatus = GameStatus.BEFORE_START;
+        surrender.setVisible(false);
+        blackPlayer.setText("●      黑方玩家 　　　");
+        whitePlayer.setText("○      白方玩家 　　　");
+        if (gameClient.getCommunicationAdapter() instanceof LocalGameAdapter) {
+            gameClient.prepare();
+            startGame.setVisible(true);
+        } else {
+            // 查看本地服务器玩家的情况
+            gameClient.getGameContext().getPlayers().forEach((k, v) -> {
+                if (v.isPrepared()) {
+                    if (v.getType() == ChessType.BLACK) {
+                        blackPlayer.setText("●      黑方玩家 已准备");
+                    } else if (v.getType() == ChessType.WHITE) {
+                        whitePlayer.setText("○      白方玩家 已准备");
+                    }
+                }
+            });
+            // 弹出计时器要求准备
+            countDown.setVisible(true);
+            countDown.startCountDown(new Consumer<Object>() {
+                @Override
+                public void accept(Object o) {
+                    gameClient.getClientOnline().getEventExecutors().shutdownGracefully();
+                    MainFrame.setErrorMsg("长时间未准备，自动断开连接");
+                }
+            });
+            ready.setVisible(true);
+        }
+    }
+
+    public void onPlayerPrepare(ChessType chessType) {
+        if (chessType == ChessType.BLACK) {
+            blackPlayer.setText("●      黑方玩家 已准备");
+        } else if (chessType == ChessType.WHITE) {
+            whitePlayer.setText("○      白方玩家 已准备");
+        }
     }
 
     static class CustomButton extends JButton {
