@@ -1,5 +1,9 @@
 package gobang.ui;
 
+import gobang.game.GameClient;
+import gobang.game.GameServer;
+import lombok.Setter;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -24,7 +28,11 @@ public class ControlPanel extends JPanel {
     private final JLabel countDown;
 
     // --- 游戏 相关
+    @Setter
+    private GameClient gameClient;
 
+    @Setter
+    private GameServer gameServer;
 
     public ControlPanel() {
         Box vBox = Box.createVerticalBox();

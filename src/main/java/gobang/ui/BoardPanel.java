@@ -1,6 +1,10 @@
 package gobang.ui;
 
 import gobang.enums.ChessType;
+import gobang.game.GameClient;
+import gobang.game.GameServer;
+import lombok.Data;
+import lombok.Setter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -23,6 +27,13 @@ public class BoardPanel extends JPanel implements MouseListener {
 
     // only for test
     private ChessType currentStatus = ChessType.WHITE;
+
+    // --- 游戏 相关
+    @Setter
+    private GameClient gameClient;
+
+    @Setter
+    private GameServer gameServer;
 
     public BoardPanel(int borderSize, int ovalRadius, int offsetX, int offsetY) {
         super();
