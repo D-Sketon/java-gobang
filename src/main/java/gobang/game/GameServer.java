@@ -33,6 +33,9 @@ public class GameServer extends AbstractGameEventHandler {
     @Getter
     private boolean timerStart;
 
+    @Getter
+    private boolean firstStep;
+
     private int timer;
 
     private int currentPlayerId;
@@ -50,6 +53,7 @@ public class GameServer extends AbstractGameEventHandler {
         this.adapterMap = new ConcurrentHashMap<>();
         this.isGameStart = false;
         this.timerStart = false;
+        this.firstStep = false;
         this.timer = 0;
         this.currentPlayerId = LOCAL_ID;
         this.serverOnline = new ServerOnline(this);
@@ -114,6 +118,9 @@ public class GameServer extends AbstractGameEventHandler {
             }
         }
         this.isGameStart = true;
+        this.firstStep = true;
+
+        // 设置当前玩家为黑棋玩家
 //        initTimer();
         onTurnStart(currentPlayerId);
     }
@@ -147,6 +154,14 @@ public class GameServer extends AbstractGameEventHandler {
         }
 
         // 如果是黑棋，需要校验
+        // 判断是否是第一步棋子
+        if(firstStep) {
+            if(position.getX() != 9 || position.getY() != 9) {
+                sendToPlayer(playerId, GameEvent.ERROR_REQUEST, new ActionParam(playerId, null));
+                return;
+            }
+            firstStep = false;
+        }
 
         log.info("the " + playerId + " player put a chess at" + position.toString());
         gameContext.getBoard().getChess()[position.getX()][position.getY()] = player.getType();
