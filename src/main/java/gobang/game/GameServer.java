@@ -115,6 +115,10 @@ public class GameServer extends AbstractGameEventHandler {
     }
 
     public void onTurnEnd(int playerId, Vector2D position) {
+        if(!isGameStart) {
+            sendToPlayer(playerId, GameEvent.ERROR_REQUEST, new ActionParam(playerId, null));
+            return;
+        }
         Player player = gameContext.getPlayers().get(playerId);
         Chess chess = new Chess();
         chess.setType(player.getType());
@@ -142,6 +146,7 @@ public class GameServer extends AbstractGameEventHandler {
 
         // 检测新放置的棋是否决定了胜负
         if (isFinished(position)) {
+            onGameResult(currentPlayerId);
             return;
         }
 
@@ -334,6 +339,9 @@ public class GameServer extends AbstractGameEventHandler {
             TimerTask timerTask = new TimerTask() {
                 @Override
                 public void run() {
+                    if(!isGameStart) {
+                        return;
+                    }
                     if (timerStart) {
                         timer++;
                     }

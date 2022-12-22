@@ -70,11 +70,11 @@ public class GameClient extends AbstractGameEventHandler {
     }
 
     public void onPlayerSurrender(int playerId) {
-        log.info("PlayerTurn = " + playerId + " onTurnEnd");
+        log.info("Player " + playerId + " surrender");
     }
 
     public void onGameResult(int playerId) {
-
+        log.info("Player " + playerId + " win");
     }
 
     public void onColorReset(Player player) {
