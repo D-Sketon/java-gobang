@@ -9,6 +9,7 @@ import gobang.enums.GameEvent;
 import gobang.network.ClientOnline;
 import gobang.ui.BoardPanel;
 import gobang.ui.ControlPanel;
+import javafx.application.Platform;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -79,6 +80,11 @@ public class GameClient extends AbstractGameEventHandler {
             gameContext.getPlayers().get(playerId).setType(player.getType());
             // 回调函数
         }
+    }
+
+    public void onSendId(int playerId) {
+        log.info("PlayerId = " + playerId);
+        this.playerId = playerId;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

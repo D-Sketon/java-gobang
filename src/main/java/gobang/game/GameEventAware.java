@@ -62,6 +62,12 @@ public interface GameEventAware {
      * @param playerId 玩家
      */
     void onError(int playerId);
+
+    /**
+     * 回传远程玩家id
+     * @param playerId
+     */
+    void onSendId(int playerId);
     /**
      * 触发事件之前回调函数，如果返回false则不会执行实际事件的触发直接
      *

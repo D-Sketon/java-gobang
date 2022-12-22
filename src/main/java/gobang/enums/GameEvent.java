@@ -29,6 +29,10 @@ public enum GameEvent {
      * 重置玩家棋子颜色，准备新的一局游戏开始
      */
     COLOR_RESET,
+    /**
+     * 回传玩家Id
+     */
+    SEND_ID,
 
     // 操作
     /**

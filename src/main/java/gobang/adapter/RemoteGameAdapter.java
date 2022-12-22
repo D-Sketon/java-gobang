@@ -2,6 +2,8 @@ package gobang.adapter;
 
 import com.google.gson.Gson;
 import gobang.entity.ActionParam;
+import gobang.entity.RemoteParam;
+import gobang.game.GameClient;
 import gobang.player.Player;
 import gobang.enums.GameEvent;
 import gobang.game.GameEventAware;
@@ -22,7 +24,18 @@ public class RemoteGameAdapter implements CommunicationAdapter{
 
     @Override
     public void sendEvent(GameEvent event, Object data) {
-
+        if (!channel.isActive()) {
+            if (self instanceof GameClient)
+//                MainController.showErrorDialog("连接中断");
+            return;
+        }
+        String json = new Gson().toJson(data);
+        RemoteParam remoteParam = new RemoteParam(event, json);
+        try {
+            channel.writeAndFlush(new Gson().toJson(remoteParam) + "\n").sync();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void receiveEvent(GameEvent event, String json) {
@@ -59,6 +72,9 @@ public class RemoteGameAdapter implements CommunicationAdapter{
                 case COLOR_RESET:
                     player = new Gson().fromJson(json, Player.class);
                     self.onColorReset(player);
+                case SEND_ID:
+                    int id = Integer.parseInt(json);
+                    self.onSendId(id);
                     break;
             }
         }

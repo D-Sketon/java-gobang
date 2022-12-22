@@ -1,21 +1,26 @@
 package gobang.game;
 
+import com.google.gson.Gson;
 import gobang.adapter.CommunicationAdapter;
 import gobang.adapter.LocalGameAdapter;
+import gobang.adapter.RemoteGameAdapter;
 import gobang.entity.ActionParam;
+import gobang.entity.Chess;
+import gobang.entity.RemoteParam;
+import gobang.enums.ChessType;
 import gobang.player.Player;
 import gobang.entity.Vector2D;
 import gobang.enums.GameEvent;
 import gobang.network.ServerOnline;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static gobang.entity.Board.HEIGHT;
+import static gobang.entity.Board.WIDTH;
 import static gobang.enums.ChessType.BLACK;
 import static gobang.enums.ChessType.WHITE;
 
@@ -86,16 +91,18 @@ public class GameServer extends AbstractGameEventHandler {
         gameContext.getPlayers().put(player.getPlayerId(), player);
         adapterMap.put(player.getPlayerId(), adapter);
 
+        sendPlayerId(player.getPlayerId(), adapter);
+
         broadcast(GameEvent.PLAYER_JOIN, player);
     }
 
-    public void gameStart() {
+    public void startGame() {
         // 玩家人数未满
         if(gameContext.getPlayers().size() != 2) {
             return;
         }
         this.isGameStart = true;
-        initTimer();
+//        initTimer();
         onTurnStart(currentPlayerId);
     }
 
@@ -105,6 +112,10 @@ public class GameServer extends AbstractGameEventHandler {
     }
 
     public void onTurnEnd(int playerId, Vector2D position) {
+        Player player = gameContext.getPlayers().get(playerId);
+        Chess chess = new Chess();
+        chess.setType(player.getType());
+
         // 校验下棋者是否是当前轮次的玩家
         if (playerId != currentPlayerId) {
             log.error("the current player is " + playerId + " expected " + currentPlayerId);
@@ -114,17 +125,16 @@ public class GameServer extends AbstractGameEventHandler {
 
         // 校验新放置的棋是否合法
         if (!isValidPosition(position)) {
-            // error
-
+            log.error("the position " + position.toString() + "has benn placed ");
+            sendToPlayer(playerId, GameEvent.ERROR_REQUEST, new ActionParam(playerId, null));
             return;
         }
 
         // 如果是黑棋，需要校验
 
-
-
-        ActionParam actionParam = new ActionParam(playerId, position);
         log.info("the " + playerId + " player put a chess at" + position.toString());
+        gameContext.getBoard().getChess()[position.getX()][position.getY()] = player.getType();
+        ActionParam actionParam = new ActionParam(playerId, position);
         broadcast(GameEvent.TURN_END, actionParam);
 
         // 检测新放置的棋是否决定了胜负
@@ -189,6 +199,25 @@ public class GameServer extends AbstractGameEventHandler {
         adapterMap.get(playerId).sendEvent(event, data);
     }
 
+    /**
+     * 仅用于远程连接有玩家加入时回传玩家Id
+     *
+     * @param id      玩家Id
+     * @param adapter 适配器
+     */
+    private void sendPlayerId(Integer id, CommunicationAdapter adapter) {
+        RemoteGameAdapter remoteGameAdapter = (RemoteGameAdapter) adapter;
+        String json = id.toString();
+        RemoteParam param = new RemoteParam();
+        param.setGameEvent(GameEvent.SEND_ID);
+        param.setParamJson(json);
+        try {
+            remoteGameAdapter.getChannel().writeAndFlush(new Gson().toJson(param) + "\n").sync();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     private boolean isValidPosition(Vector2D position) {
@@ -199,6 +228,98 @@ public class GameServer extends AbstractGameEventHandler {
 
 
     private boolean isFinished(Vector2D position) {
+        int consecutiveChess = 1;
+        int x = position.getX();
+        int y = position.getY();
+        ChessType type = gameContext.getBoard().getChess()[position.getX()][position.getY()];
+
+        // 横向五子
+        for(int i = x + 1; i < WIDTH; i++) {
+            ChessType chessType = gameContext.getBoard().getChess()[i][y];
+            if(chessType != null && chessType.equals(type)) {
+                consecutiveChess++;
+            } else {
+                break;
+            }
+        }
+        for(int i = x - 1; i >= 0; i--) {
+            ChessType chessType = gameContext.getBoard().getChess()[i][y];
+            if(chessType != null && chessType.equals(type)) {
+                consecutiveChess++;
+            } else {
+                break;
+            }
+        }
+        if(consecutiveChess == 5) {
+            return true;
+        }
+
+        // 竖向五子
+        consecutiveChess = 1;
+        for(int j = y + 1; j < HEIGHT; j++) {
+            ChessType chessType = gameContext.getBoard().getChess()[x][j];
+            if(chessType != null && chessType.equals(type)) {
+                consecutiveChess++;
+            } else {
+                break;
+            }
+        }
+        for(int j = y - 1; j >= 0; j--) {
+            ChessType chessType = gameContext.getBoard().getChess()[x][j];
+            if(chessType != null && chessType.equals(type)) {
+                consecutiveChess++;
+            } else {
+                break;
+            }
+        }
+        if(consecutiveChess == 5) {
+            return true;
+        }
+
+        // 右侧45五子
+        consecutiveChess = 1;
+        for(int i = x + 1; i < WIDTH; i++) {
+            ChessType chessType = gameContext.getBoard().getChess()[i][y + i - x];
+            if(chessType != null && chessType.equals(type)) {
+                consecutiveChess++;
+            } else {
+                break;
+            }
+        }
+        for(int i = x - 1; i >= 0; i--) {
+            ChessType chessType = gameContext.getBoard().getChess()[i][y + i - x];
+            if(chessType != null && chessType.equals(type)) {
+                consecutiveChess++;
+            } else {
+                break;
+            }
+        }
+        if(consecutiveChess == 5) {
+            return true;
+        }
+
+        // 左侧45五子
+        consecutiveChess = 1;
+        for(int i = x + 1; i < WIDTH; i++) {
+            ChessType chessType = gameContext.getBoard().getChess()[i][y - i + x];
+            if(chessType != null && chessType.equals(type)) {
+                consecutiveChess++;
+            } else {
+                break;
+            }
+        }
+        for(int i = x - 1; i >= 0; i--) {
+            ChessType chessType = gameContext.getBoard().getChess()[i][y - i + x];
+            if(chessType != null && chessType.equals(type)) {
+                consecutiveChess++;
+            } else {
+                break;
+            }
+        }
+        if(consecutiveChess == 5) {
+            return true;
+        }
+
         return false;
     }
 

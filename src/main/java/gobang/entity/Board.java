@@ -5,5 +5,10 @@ import lombok.Data;
 
 @Data
 public class Board {
-    ChessType[][] chess = new ChessType[19][19];
+
+    public static final Integer WIDTH = 19;
+
+    public static final Integer HEIGHT = 19;
+
+    ChessType[][] chess = new ChessType[WIDTH][HEIGHT];
 }

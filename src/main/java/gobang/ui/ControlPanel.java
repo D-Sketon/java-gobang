@@ -94,7 +94,7 @@ public class ControlPanel extends JPanel {
         startGame.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                gameServer.startGame();
             }
         });
         surrender.addActionListener(new ActionListener() {

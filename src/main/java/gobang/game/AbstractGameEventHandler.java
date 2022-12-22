@@ -49,6 +49,12 @@ public class AbstractGameEventHandler implements GameEventAware{
     }
 
     @Override
+    public void onSendId(int playerId) {
+
+    }
+
+
+    @Override
     public boolean beforeEvent(GameEvent event, Object data) {
         return true;
     }
