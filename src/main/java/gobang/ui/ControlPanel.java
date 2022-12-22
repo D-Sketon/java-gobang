@@ -17,6 +17,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
+import java.util.function.Consumer;
 
 public class ControlPanel extends JPanel {
 
@@ -52,7 +53,12 @@ public class ControlPanel extends JPanel {
         joinServer = new CustomButton(btnWidth, btnHeight, "加入服务器");
         startGame = new CustomButton(btnWidth, btnHeight, "开始游戏");
         surrender = new CustomButton(btnWidth, btnHeight, "投降");
-        countDown = new TimeLabel(null);
+        countDown = new TimeLabel(new Consumer<Object>() {
+            @Override
+            public void accept(Object o) {
+                gameClient.surrender();
+            }
+        });
         countDown.setFont(FONT);
         blackPlayer = new JLabel("●      黑方玩家 　　　");
         blackPlayer.setFont(FONT);
@@ -149,6 +155,24 @@ public class ControlPanel extends JPanel {
             whitePlayer.setText("○      白方玩家 已准备");
         }
         gameStatus = GameStatus.BEFORE_START;
+    }
+
+    public void onTurnStart(int playerId) {
+        if (gameStatus != GameStatus.PLAYING) {
+            gameStatus = GameStatus.PLAYING;
+            surrender.setVisible(true);
+
+        }
+    }
+
+    public void onSelfTurnStart() {
+        countDown.setVisible(true);
+        countDown.startCountDown();
+    }
+
+    public void onSelfTurnEnd() {
+        countDown.setVisible(false);
+        countDown.stopCountDown();
     }
 
     static class CustomButton extends JButton {
