@@ -11,8 +11,6 @@ import lombok.Setter;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.font.FontRenderContext;
@@ -22,9 +20,9 @@ import java.util.function.Consumer;
 public class ControlPanel extends JPanel {
 
     // --- 配置 相关
-    private static final int FONT_SIZE = 18;
-    private static final Font FONT = new Font("Microsoft Yahei", Font.BOLD, FONT_SIZE);
-    private static final FontRenderContext RENDER_CONTEXT = new FontRenderContext(new AffineTransform(), true, true);
+    public static final int FONT_SIZE = 18;
+    public static final Font FONT = new Font("Microsoft Yahei", Font.BOLD, FONT_SIZE);
+    public static final FontRenderContext RENDER_CONTEXT = new FontRenderContext(new AffineTransform(), true, true);
 
     // --- Swing 相关
     private final JButton startServer;
@@ -92,68 +90,53 @@ public class ControlPanel extends JPanel {
     }
 
     private void initBinding() {
-        startServer.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new Thread(() -> gameServer.startServer(), "Server Netty Thread").start();
-                LocalGameAdapter localGameAdapter = new LocalGameAdapter(gameServer);
-                gameClient.setCommunicationAdapter(localGameAdapter);
-                gameServer.onLocalJoin(gameClient);
-            }
+        startServer.addActionListener(e -> {
+            new Thread(() -> gameServer.startServer(), "Server Netty Thread").start();
+            LocalGameAdapter localGameAdapter = new LocalGameAdapter(gameServer);
+            gameClient.setCommunicationAdapter(localGameAdapter);
+            gameServer.onLocalJoin(gameClient);
         });
-        joinServer.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String ipAddress = JOptionPane.showInputDialog(null, "请输入IP地址");
-                RemoteGameAdapter remoteGameAdapter = new RemoteGameAdapter();
-                gameClient.setCommunicationAdapter(remoteGameAdapter);
-                remoteGameAdapter.setSelf(gameClient);
-                new Thread(() -> {
-                    try {
-                        gameClient.getClientOnline().initNetty(gameClient, ipAddress);
-                    } catch (Exception e0) {
-                        e0.printStackTrace();
-                    }
-                }, "Client Netty Thread").start();
-            }
+        joinServer.addActionListener(e -> {
+            String ipAddress = JOptionPane.showInputDialog(null, "请输入IP地址");
+            RemoteGameAdapter remoteGameAdapter = new RemoteGameAdapter();
+            gameClient.setCommunicationAdapter(remoteGameAdapter);
+            remoteGameAdapter.setSelf(gameClient);
+            new Thread(() -> {
+                try {
+                    gameClient.getClientOnline().initNetty(gameClient, ipAddress);
+                } catch (Exception e0) {
+                    e0.printStackTrace();
+                }
+            }, "Client Netty Thread").start();
         });
-        startGame.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (gameClient.getGameContext().getPlayers().size() != 2) {
-                    MainFrame.setErrorMsg("有玩家未准备");
+        startGame.addActionListener(e -> {
+            if (gameClient.getGameContext().getPlayers().size() != 2) {
+                MainFrame.setErrorMsg("有玩家未准备");
 
-                } else {
-                    boolean b = true;
-                    for (Player player : gameClient.getGameContext().getPlayers().values()) {
-                        if (!player.isPrepared()) {
-                            MainFrame.setErrorMsg("有玩家未准备");
-                            b = false;
-                            break;
-                        }
+            } else {
+                boolean b = true;
+                for (Player player : gameClient.getGameContext().getPlayers().values()) {
+                    if (!player.isPrepared()) {
+                        MainFrame.setErrorMsg("有玩家未准备");
+                        b = false;
+                        break;
                     }
-                    if (b) {
-                        gameServer.startGame();
-                        startGame.setVisible(false);
-                    }
+                }
+                if (b) {
+                    gameServer.startGame();
+                    startGame.setVisible(false);
                 }
             }
         });
-        surrender.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                onSelfTurnEnd();
-                gameClient.surrender();
-            }
+        surrender.addActionListener(e -> {
+            onSelfTurnEnd();
+            gameClient.surrender();
         });
-        ready.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                gameClient.prepare();
-                countDown.stopCountDown();
-                ready.setVisible(false);
-                countDown.setVisible(false);
-            }
+        ready.addActionListener(e -> {
+            gameClient.prepare();
+            countDown.stopCountDown();
+            ready.setVisible(false);
+            countDown.setVisible(false);
         });
     }
 
@@ -164,6 +147,19 @@ public class ControlPanel extends JPanel {
         }
         blackPlayer.setVisible(true);
         whitePlayer.setVisible(true);
+        if (!player.isPrepared()) {
+            if (player.getType() == ChessType.BLACK) {
+                blackPlayer.setText("●      黑方玩家 已加入");
+            } else if (player.getType() == ChessType.WHITE) {
+                whitePlayer.setText("○      白方玩家 已加入");
+            }
+        } else {
+            if (player.getType() == ChessType.BLACK) {
+                blackPlayer.setText("●      黑方玩家 已准备");
+            } else if (player.getType() == ChessType.WHITE) {
+                whitePlayer.setText("○      白方玩家 已准备");
+            }
+        }
         // 本地玩家才可以开始游戏
         if (gameClient.getCommunicationAdapter() instanceof LocalGameAdapter) {
             // 本地玩家自动准备
@@ -171,7 +167,6 @@ public class ControlPanel extends JPanel {
                 gameClient.prepare();
                 startGame.setVisible(true);
             }
-
         } else {
             if (!ready.isVisible()) {
                 // 查看本地服务器玩家的情况
@@ -182,28 +177,31 @@ public class ControlPanel extends JPanel {
                         } else if (v.getType() == ChessType.WHITE) {
                             whitePlayer.setText("○      白方玩家 已准备");
                         }
+                    } else {
+                        if (v.getType() == ChessType.BLACK) {
+                            blackPlayer.setText("●      黑方玩家 已加入");
+                        } else if (v.getType() == ChessType.WHITE) {
+                            whitePlayer.setText("○      白方玩家 已加入");
+                        }
                     }
                 });
                 // 弹出计时器要求准备
                 countDown.setVisible(true);
-                countDown.startCountDown(new Consumer<Object>() {
-                    @Override
-                    public void accept(Object o) {
-                        gameClient.getClientOnline().getEventExecutors().shutdownGracefully();
-                        MainFrame.setErrorMsg("长时间未准备，自动断开连接");
+                countDown.startCountDown(o -> {
+                    gameClient.getClientOnline().getEventExecutors().shutdownGracefully();
+                    MainFrame.setErrorMsg("长时间未准备，自动断开连接");
 
-                        startServer.setVisible(true);
-                        joinServer.setVisible(true);
-                        // 默认不可见
-                        countDown.setVisible(false);
-                        countDown.stopCountDown();
-                        startGame.setVisible(false);
-                        surrender.setVisible(false);
-                        blackPlayer.setVisible(false);
-                        whitePlayer.setVisible(false);
-                        ready.setVisible(false);
-                        gameStatus = GameStatus.INIT;
-                    }
+                    startServer.setVisible(true);
+                    joinServer.setVisible(true);
+                    // 默认不可见
+                    countDown.setVisible(false);
+                    countDown.stopCountDown();
+                    startGame.setVisible(false);
+                    surrender.setVisible(false);
+                    blackPlayer.setVisible(false);
+                    whitePlayer.setVisible(false);
+                    ready.setVisible(false);
+                    gameStatus = GameStatus.INIT;
                 });
                 ready.setVisible(true);
             }
@@ -228,26 +226,37 @@ public class ControlPanel extends JPanel {
         countDown.stopCountDown();
     }
 
+    public void onPreGameResult() {
+        countDown.setVisible(false);
+        countDown.stopCountDown();
+        surrender.setVisible(false);
+    }
+
     public void onGameResult() {
         gameStatus = GameStatus.BEFORE_START;
         onSelfTurnEnd();
         surrender.setVisible(false);
         blackPlayer.setText("●      黑方玩家 　　　");
         whitePlayer.setText("○      白方玩家 　　　");
+        gameClient.getGameContext().getPlayers().forEach((k, v) -> {
+            if (v.isPrepared()) {
+                if (v.getType() == ChessType.BLACK) {
+                    blackPlayer.setText("●      黑方玩家 已准备");
+                } else if (v.getType() == ChessType.WHITE) {
+                    whitePlayer.setText("○      白方玩家 已准备");
+                }
+            } else {
+                if (v.getType() == ChessType.BLACK) {
+                    blackPlayer.setText("●      黑方玩家 已加入");
+                } else if (v.getType() == ChessType.WHITE) {
+                    whitePlayer.setText("○      白方玩家 已加入");
+                }
+            }
+        });
         if (gameClient.getCommunicationAdapter() instanceof LocalGameAdapter) {
             gameClient.prepare();
             startGame.setVisible(true);
         } else {
-            // 查看本地服务器玩家的情况
-            gameClient.getGameContext().getPlayers().forEach((k, v) -> {
-                if (v.isPrepared()) {
-                    if (v.getType() == ChessType.BLACK) {
-                        blackPlayer.setText("●      黑方玩家 已准备");
-                    } else if (v.getType() == ChessType.WHITE) {
-                        whitePlayer.setText("○      白方玩家 已准备");
-                    }
-                }
-            });
             // 弹出计时器要求准备
             countDown.setVisible(true);
             countDown.startCountDown(new Consumer<Object>() {
@@ -268,6 +277,7 @@ public class ControlPanel extends JPanel {
             whitePlayer.setText("○      白方玩家 已准备");
         }
     }
+
 
     static class CustomButton extends JButton {
         public int width;

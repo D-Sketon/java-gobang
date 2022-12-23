@@ -1,7 +1,6 @@
 package gobang.game;
 
 import gobang.adapter.CommunicationAdapter;
-import gobang.adapter.LocalGameAdapter;
 import gobang.entity.ActionParam;
 import gobang.entity.Board;
 import gobang.entity.Vector2D;
@@ -96,11 +95,11 @@ public class GameClient extends AbstractGameEventHandler {
 //            reset();
 //        }
         boardPanel.onGameResult();
-        controlPanel.onGameResult();
+        controlPanel.onPreGameResult();
         if (playerId == this.playerId) {
-            MainFrame.setInfoMsg("您赢了！");
+            MainFrame.setInfoMsg("您赢了！", o -> controlPanel.onGameResult());
         } else {
-            MainFrame.setInfoMsg("您输了！");
+            MainFrame.setInfoMsg("您输了！", o -> controlPanel.onGameResult());
         }
     }
 
