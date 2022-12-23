@@ -36,7 +36,6 @@ public class MainFrame extends JFrame {
         GameClient gameClient = new GameClient(boardPanel, controlPanel);
         GameServer gameServer = new GameServer();
         boardPanel.setGameClient(gameClient);
-        boardPanel.setGameServer(gameServer);
         controlPanel.setGameClient(gameClient);
         controlPanel.setGameServer(gameServer);
 

@@ -222,6 +222,12 @@ public class ControlPanel extends JPanel {
         }
     }
 
+    /**
+     * 改变黑白棋手的基本信息
+     *
+     * @param black 黑棋信息
+     * @param white 白棋信息
+     */
     public void changePlayerInfo(String black, String white) {
         blackPlayer.setText(black);
         whitePlayer.setText(white);

@@ -75,7 +75,7 @@ public class ServerOnline {
 
         @Override
         public void channelActive(ChannelHandlerContext ctx) throws Exception {
-            if (connections < 4) {
+            if (connections < 1) {
                 connections++;
                 super.channelActive(ctx);
             } else

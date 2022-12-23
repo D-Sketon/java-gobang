@@ -29,9 +29,6 @@ public class BoardPanel extends JPanel implements MouseListener {
     @Setter
     private GameClient gameClient;
 
-    @Setter
-    private GameServer gameServer;
-
     public BoardPanel(int borderSize, int ovalRadius, int offsetX, int offsetY) {
         super();
         this.setBackground(Color.orange);
