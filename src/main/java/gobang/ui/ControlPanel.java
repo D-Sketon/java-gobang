@@ -120,13 +120,23 @@ public class ControlPanel extends JPanel {
         startGame.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (gameClient.getGameContext().getPlayers().size() == 2) {
-                    gameServer.startGame();
-                    startGame.setVisible(false);
-                } else {
+                if (gameClient.getGameContext().getPlayers().size() != 2) {
                     MainFrame.setErrorMsg("有玩家未准备");
-                }
 
+                } else {
+                    boolean b = true;
+                    for (Player player : gameClient.getGameContext().getPlayers().values()) {
+                        if (!player.isPrepared()) {
+                            MainFrame.setErrorMsg("有玩家未准备");
+                            b = false;
+                            break;
+                        }
+                    }
+                    if (b) {
+                        gameServer.startGame();
+                        startGame.setVisible(false);
+                    }
+                }
             }
         });
         surrender.addActionListener(new ActionListener() {
@@ -181,6 +191,18 @@ public class ControlPanel extends JPanel {
                     public void accept(Object o) {
                         gameClient.getClientOnline().getEventExecutors().shutdownGracefully();
                         MainFrame.setErrorMsg("长时间未准备，自动断开连接");
+
+                        startServer.setVisible(true);
+                        joinServer.setVisible(true);
+                        // 默认不可见
+                        countDown.setVisible(false);
+                        countDown.stopCountDown();
+                        startGame.setVisible(false);
+                        surrender.setVisible(false);
+                        blackPlayer.setVisible(false);
+                        whitePlayer.setVisible(false);
+                        ready.setVisible(false);
+                        gameStatus = GameStatus.INIT;
                     }
                 });
                 ready.setVisible(true);
@@ -208,6 +230,7 @@ public class ControlPanel extends JPanel {
 
     public void onGameResult() {
         gameStatus = GameStatus.BEFORE_START;
+        onSelfTurnEnd();
         surrender.setVisible(false);
         blackPlayer.setText("●      黑方玩家 　　　");
         whitePlayer.setText("○      白方玩家 　　　");

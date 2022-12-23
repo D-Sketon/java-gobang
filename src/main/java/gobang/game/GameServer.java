@@ -91,7 +91,7 @@ public class GameServer extends AbstractGameEventHandler {
         broadcast(GameEvent.PREPARE, new ActionParam(playerId, null));
     }
 
-    public void joinGameRemote(CommunicationAdapter adapter) {
+    public Player joinGameRemote(CommunicationAdapter adapter) {
         log.info("New client tries to joinGameRemote...");
         Player player = new Player(REMOTE_ID, false, WHITE); // 新加入的玩家默认先白棋
 
@@ -105,6 +105,7 @@ public class GameServer extends AbstractGameEventHandler {
         sendPlayerId(player.getPlayerId(), adapter);
 
         broadcast(GameEvent.PLAYER_JOIN, player);
+        return player;
     }
 
     public void startGame() {

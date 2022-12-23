@@ -3,10 +3,11 @@ package gobang.adapter;
 import com.google.gson.Gson;
 import gobang.entity.ActionParam;
 import gobang.entity.RemoteParam;
-import gobang.game.GameClient;
-import gobang.player.Player;
 import gobang.enums.GameEvent;
+import gobang.game.GameClient;
 import gobang.game.GameEventAware;
+import gobang.player.Player;
+import gobang.ui.MainFrame;
 import io.netty.channel.Channel;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,7 +17,7 @@ import lombok.Setter;
  */
 @Setter
 @Getter
-public class RemoteGameAdapter implements CommunicationAdapter{
+public class RemoteGameAdapter implements CommunicationAdapter {
 
     private GameEventAware self;
 
@@ -25,8 +26,9 @@ public class RemoteGameAdapter implements CommunicationAdapter{
     @Override
     public void sendEvent(GameEvent event, Object data) {
         if (!channel.isActive()) {
-            if (self instanceof GameClient)
-//                MainController.showErrorDialog("连接中断");
+            if (self instanceof GameClient) {
+                MainFrame.setErrorMsg("连接中断");
+            }
             return;
         }
         String json = new Gson().toJson(data);
@@ -39,11 +41,11 @@ public class RemoteGameAdapter implements CommunicationAdapter{
     }
 
     public void receiveEvent(GameEvent event, String json) {
-        ActionParam param = null;
-        Player player = null;
+        ActionParam param;
+        Player player;
         boolean next = self.beforeEvent(event, json);
 
-        if(next) {
+        if (next) {
             switch (event) {
                 case PLAYER_JOIN:
                     player = new Gson().fromJson(json, Player.class);

@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import gobang.adapter.RemoteGameAdapter;
 import gobang.entity.RemoteParam;
 import gobang.game.GameClient;
+import gobang.ui.MainFrame;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
@@ -32,6 +33,6 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-
+        MainFrame.setErrorMsg("连接中断");
     }
 }
