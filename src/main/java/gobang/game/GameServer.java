@@ -122,7 +122,13 @@ public class GameServer extends AbstractGameEventHandler {
         this.firstStep = true;
 
         // 设置当前玩家为黑棋玩家
-//        initTimer();
+        initTimer();
+        for (Player player : gameContext.getPlayers().values()) {
+            if(player.getType() == BLACK) {
+                currentPlayerId = player.getPlayerId();
+                break;
+            }
+        }
         onTurnStart(currentPlayerId);
     }
 
@@ -195,6 +201,7 @@ public class GameServer extends AbstractGameEventHandler {
     }
 
     public void onColorChange(Player player) {
+        gameContext.getPlayers().get(player.getPlayerId()).setType(player.getType());
         broadcast(GameEvent.COLOR_CHANGE, player);
     }
 
