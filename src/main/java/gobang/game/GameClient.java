@@ -17,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import static gobang.entity.Board.HEIGHT;
 import static gobang.entity.Board.WIDTH;
-import static gobang.game.GameServer.LOCAL_ID;
 import static gobang.game.GameServer.REMOTE_ID;
 
 @Getter
@@ -57,13 +56,14 @@ public class GameClient extends AbstractGameEventHandler {
         log.info("PlayerId = " + player.getType() + " onPlayerJoin");
         gameContext.getPlayers().put(player.getPlayerId(), player);
         controlPanel.onPlayerJoin(player);
+        onStateChange();
     }
 
     public void onPlayerPrepare(int playerId) {
         Player player = gameContext.getPlayers().get(playerId);
         player.setPrepared(true);
         ChessType type = gameContext.getPlayers().get(playerId).getType();
-        controlPanel.onPlayerPrepare(type);
+        onStateChange();
     }
 
     public void onTurnStart(int playerId) {
@@ -92,7 +92,6 @@ public class GameClient extends AbstractGameEventHandler {
     public void onGameResult(int playerId) {
         log.info("Player " + playerId + " win");
 //        if (communicationAdapter instanceof LocalGameAdapter) {
-//            // 本地服务器直接reset，防止出现异步问题
 //            reset();
 //        }
         boardPanel.onGameResult();
@@ -102,10 +101,12 @@ public class GameClient extends AbstractGameEventHandler {
         } else {
             MainFrame.setInfoMsg("您输了！", o -> controlPanel.onGameResult());
         }
+        onStateChange();
     }
 
     public void onColorChange(Player player) {
         gameContext.getPlayers().get(player.getPlayerId()).setType(player.getType());
+        onStateChange();
     }
 
     public void onSendId(int playerId) {
@@ -131,16 +132,12 @@ public class GameClient extends AbstractGameEventHandler {
     }
 
     public void onPlayerLeave(int playerId) {
+        log.info("PlayerId = " + playerId + " onPlayerLeave");
         gameContext.getPlayers().remove(playerId);
-        // 如果是远程玩家离开
-        if(playerId == REMOTE_ID) {
-            // 房主重新等待
-        }
-        // 如果房主自己断线，远程玩家接收不到
-        //
+        onStateChange();
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //====================================================================================================
 
     public void playerChess(Vector2D position) {
         communicate(GameEvent.TURN_END, new ActionParam(this.playerId, position));
@@ -156,6 +153,28 @@ public class GameClient extends AbstractGameEventHandler {
 
     public void reset() {
         communicate(GameEvent.GAME_RESET, null);
+    }
+
+    //====================================================================================================
+    public void onStateChange() {
+        String blackInfo = "●      黑方玩家 　　　";
+        String whiteInfo = "○      白方玩家 　　　";
+        for (Player player : gameContext.getPlayers().values()) {
+            if (player.getType() == ChessType.BLACK) {
+                if (player.isPrepared()) {
+                    blackInfo = "●      黑方玩家 已准备";
+                } else {
+                    blackInfo = "●      黑方玩家 已加入";
+                }
+            } else if (player.getType() == ChessType.WHITE) {
+                if (player.isPrepared()) {
+                    whiteInfo = "○      白方玩家 已准备";
+                } else {
+                    whiteInfo = "○      白方玩家 已加入";
+                }
+            }
+        }
+        controlPanel.changePlayerInfo(blackInfo, whiteInfo);
     }
 
 }

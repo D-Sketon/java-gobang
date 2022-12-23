@@ -60,7 +60,7 @@ public interface GameEventAware {
      *
      * @param playerId 玩家id
      */
-    void onPlayerLeave(Integer playerId);
+    void onPlayerLeave(int playerId);
 
     /**
      * 错误请求的回调

@@ -125,7 +125,7 @@ public class GameServer extends AbstractGameEventHandler {
         // 设置当前玩家为黑棋玩家
         initTimer();
         for (Player player : gameContext.getPlayers().values()) {
-            if(player.getType() == BLACK) {
+            if (player.getType() == BLACK) {
                 currentPlayerId = player.getPlayerId();
                 break;
             }
@@ -164,8 +164,8 @@ public class GameServer extends AbstractGameEventHandler {
 
         // 如果是黑棋，需要校验
         // 判断是否是第一步棋子
-        if(firstStep) {
-            if(position.getX() != 9 || position.getY() != 9) {
+        if (firstStep) {
+            if (position.getX() != 9 || position.getY() != 9) {
                 sendToPlayer(playerId, GameEvent.ERROR_REQUEST, new ActionParam(playerId, null));
                 return;
             }
@@ -208,12 +208,12 @@ public class GameServer extends AbstractGameEventHandler {
     }
 
     public void onPlayerLeave(int playerId) {
-        onPlayerSurrender(playerId);
-        broadcast(GameEvent.PLAYER_LEAVE, new ActionParam(playerId, null));
+//        onPlayerSurrender(playerId);
         // 将房主重置为黑棋
-        Player host = gameContext.getPlayers().get(0);
+        Player host = gameContext.getPlayers().get(LOCAL_ID);
         host.setType(BLACK); // 房主设为黑棋
         onColorChange(host);
+        broadcast(GameEvent.PLAYER_LEAVE, new ActionParam(playerId, null));
     }
 
     /**

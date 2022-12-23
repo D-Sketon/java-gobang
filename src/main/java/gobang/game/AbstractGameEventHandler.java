@@ -47,7 +47,7 @@ public class AbstractGameEventHandler implements GameEventAware{
     }
 
     @Override
-    public void onPlayerLeave(Integer playerId) {
+    public void onPlayerLeave(int playerId) {
 
     }
 
