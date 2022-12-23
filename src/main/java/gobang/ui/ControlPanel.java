@@ -2,7 +2,6 @@ package gobang.ui;
 
 import gobang.adapter.LocalGameAdapter;
 import gobang.adapter.RemoteGameAdapter;
-import gobang.enums.ChessType;
 import gobang.enums.GameStatus;
 import gobang.game.GameClient;
 import gobang.game.GameServer;
@@ -42,8 +41,28 @@ public class ControlPanel extends JPanel {
     private GameClient gameClient;
     @Setter
     private GameServer gameServer;
-
     private GameStatus gameStatus = GameStatus.INIT;
+
+    // 长时间未准备的Consumer
+    private final Consumer<Object> consumer = new Consumer<Object>() {
+        @Override
+        public void accept(Object o) {
+            gameClient.getClientOnline().getEventExecutors().shutdownGracefully();
+            MainFrame.setErrorMsg("长时间未准备，自动断开连接");
+
+            startServer.setVisible(true);
+            joinServer.setVisible(true);
+            // 默认不可见
+            countDown.setVisible(false);
+            countDown.stopCountDown();
+            startGame.setVisible(false);
+            surrender.setVisible(false);
+            blackPlayer.setVisible(false);
+            whitePlayer.setVisible(false);
+            ready.setVisible(false);
+            gameStatus = GameStatus.INIT;
+        }
+    };
 
     public ControlPanel() {
         Box vBox = Box.createVerticalBox();
@@ -158,22 +177,7 @@ public class ControlPanel extends JPanel {
             if (!ready.isVisible()) {
                 // 弹出计时器要求准备
                 countDown.setVisible(true);
-                countDown.startCountDown(o -> {
-                    gameClient.getClientOnline().getEventExecutors().shutdownGracefully();
-                    MainFrame.setErrorMsg("长时间未准备，自动断开连接");
-
-                    startServer.setVisible(true);
-                    joinServer.setVisible(true);
-                    // 默认不可见
-                    countDown.setVisible(false);
-                    countDown.stopCountDown();
-                    startGame.setVisible(false);
-                    surrender.setVisible(false);
-                    blackPlayer.setVisible(false);
-                    whitePlayer.setVisible(false);
-                    ready.setVisible(false);
-                    gameStatus = GameStatus.INIT;
-                });
+                countDown.startCountDown(consumer);
                 ready.setVisible(true);
             }
         }
@@ -213,18 +217,12 @@ public class ControlPanel extends JPanel {
         } else {
             // 弹出计时器要求准备
             countDown.setVisible(true);
-            countDown.startCountDown(new Consumer<Object>() {
-                @Override
-                public void accept(Object o) {
-                    gameClient.getClientOnline().getEventExecutors().shutdownGracefully();
-                    MainFrame.setErrorMsg("长时间未准备，自动断开连接");
-                }
-            });
+            countDown.startCountDown(consumer);
             ready.setVisible(true);
         }
     }
 
-    public void changePlayerInfo(String black,String white) {
+    public void changePlayerInfo(String black, String white) {
         blackPlayer.setText(black);
         whitePlayer.setText(white);
     }
