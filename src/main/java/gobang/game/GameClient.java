@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import static gobang.entity.Board.HEIGHT;
 import static gobang.entity.Board.WIDTH;
+import static gobang.game.GameServer.LOCAL_ID;
 import static gobang.game.GameServer.REMOTE_ID;
 
 @Getter
@@ -127,6 +128,16 @@ public class GameClient extends AbstractGameEventHandler {
                 board.getChess()[i][j] = null;
             }
         }
+    }
+
+    public void onPlayerLeave(int playerId) {
+        gameContext.getPlayers().remove(playerId);
+        // 如果是远程玩家离开
+        if(playerId == REMOTE_ID) {
+            // 房主重新等待
+        }
+        // 如果房主自己断线，远程玩家接收不到
+        //
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

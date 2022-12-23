@@ -139,6 +139,7 @@ public class GameServer extends AbstractGameEventHandler {
     }
 
     public void onTurnEnd(int playerId, Vector2D position) {
+        System.out.println(position);
         if (!isGameStart) {
             sendToPlayer(playerId, GameEvent.ERROR_REQUEST, new ActionParam(playerId, null));
             return;
@@ -207,16 +208,12 @@ public class GameServer extends AbstractGameEventHandler {
     }
 
     public void onPlayerLeave(int playerId) {
-        // 房主离开
-
-        // 远程玩家离开
-        if (playerId == REMOTE_ID) {
-            sendToPlayer(LOCAL_ID, GameEvent.PLAYER_LEAVE, new ActionParam(playerId, null));
-            // 将房主重置为黑棋
-            Player host = gameContext.getPlayers().get(0);
-            host.setType(BLACK); // 房主设为黑棋
-            onColorChange(host);
-        }
+        onPlayerSurrender(playerId);
+        broadcast(GameEvent.PLAYER_LEAVE, new ActionParam(playerId, null));
+        // 将房主重置为黑棋
+        Player host = gameContext.getPlayers().get(0);
+        host.setType(BLACK); // 房主设为黑棋
+        onColorChange(host);
     }
 
     /**
@@ -342,9 +339,9 @@ public class GameServer extends AbstractGameEventHandler {
             return true;
         }
 
-        // 右侧45五子
+        // 左侧45五子
         consecutiveChess = 1;
-        for (int i = x + 1; i < WIDTH; i++) {
+        for (int i = x + 1; i < WIDTH && (y + i - x) < HEIGHT; i++) {
             ChessType chessType = gameContext.getBoard().getChess()[i][y + i - x];
             if (chessType != null && chessType.equals(type)) {
                 consecutiveChess++;
@@ -352,7 +349,7 @@ public class GameServer extends AbstractGameEventHandler {
                 break;
             }
         }
-        for (int i = x - 1; i >= 0; i--) {
+        for (int i = x - 1; i >= 0 && (y + i - x) >= 0; i--) {
             ChessType chessType = gameContext.getBoard().getChess()[i][y + i - x];
             if (chessType != null && chessType.equals(type)) {
                 consecutiveChess++;
@@ -364,9 +361,9 @@ public class GameServer extends AbstractGameEventHandler {
             return true;
         }
 
-        // 左侧45五子
+        // 右侧45五子
         consecutiveChess = 1;
-        for (int i = x + 1; i < WIDTH; i++) {
+        for (int i = x + 1; i < WIDTH && (y - i + x) >= 0; i++) {
             ChessType chessType = gameContext.getBoard().getChess()[i][y - i + x];
             if (chessType != null && chessType.equals(type)) {
                 consecutiveChess++;
@@ -374,7 +371,7 @@ public class GameServer extends AbstractGameEventHandler {
                 break;
             }
         }
-        for (int i = x - 1; i >= 0; i--) {
+        for (int i = x - 1; i >= 0 && (y - i + x) < HEIGHT; i--) {
             ChessType chessType = gameContext.getBoard().getChess()[i][y - i + x];
             if (chessType != null && chessType.equals(type)) {
                 consecutiveChess++;
